@@ -364,21 +364,29 @@ const sstore = { get(k){ try { return sessionStorage.getItem(k); } catch(e){ ret
 /* ---------- Questions ---------- */
 const DEFAULT_Q = [
   {q:"Comment s'appelle la tenue du judoka ?", a:["Le tatami","Le judogi","Le dojo","Le randori"], c:1, t:20},
-  {q:"Dans quel pays le judo est-il né ?", a:["En Chine","En Corée","Au Japon","En France"], c:2, t:20},
-  {q:"Que fait-on en montant sur le tatami ?", a:["On salue","On court","On crie","On applaudit"], c:0, t:15},
-  {q:"Qui a inventé le judo ?", a:["Bruce Lee","Teddy Riner","Mario","Jigoro Kano"], c:3, t:20},
+  {q:"Dans quel pays le judo est-il né ?", a:["En Chine","En Corée","Au Japon","En Thaïlande"], c:2, t:20},
+  {q:"Combien de fois peut-on marquer ippon dans un même combat ?", a:["Une seule fois","Deux fois","Trois fois","Autant qu'on veut"], c:0, t:20},
+  {q:"Qui a inventé le judo ?", a:["Bruce Lee","Teddy Riner","Jigoro Kano","Mario"], c:2, t:20},
   {q:"Que veut dire « Hajime » ?", a:["Arrêtez","Commencez","Saluez","Bravo"], c:1, t:20},
-  {q:"Que veut dire « Matte » ?", a:["Arrêtez / attendez","Plus vite","Tombez","Gagné"], c:0, t:20},
-  {q:"Quelle est la toute première ceinture ?", a:["Jaune","Orange","Blanche","Verte"], c:2, t:15},
-  {q:"Comment s'appelle la salle où l'on fait du judo ?", a:["Le ring","Le dojo","Le terrain","Le stade"], c:1, t:15},
+  {q:"Que veut dire « Matte » ?", a:["Mettez-vous en garde","Arrêtez","Matez l'adversaire","Mangez"], c:1, t:20},
+  {q:"Quelle ceinture n'existe PAS au judo en France ?", a:["Jaune","Orange","Rose","Marron"], c:2, t:20},
+  {q:"Comment s'appelle la salle où l'on fait du judo ?", a:["Le ring","Le dojo","Le terrain","La cage"], c:1, t:15},
   {q:"« Judo » veut dire…", a:["La voie de la souplesse","La force du tigre","Le combat rapide","L'art du poing"], c:0, t:20},
-  {q:"Quel est le meilleur score en combat ?", a:["Shido","Waza-ari","Ippon","Hantei"], c:2, t:20},
+  {q:"Au judo, a-t-on le droit de donner des coups de poing ?", a:["Oui, dans le ventre","Oui, si l'arbitre ne voit pas","Non, jamais","Seulement en finale"], c:2, t:20},
   {q:"Comment s'appelle l'art de bien tomber ?", a:["Le kata","Le randori","L'ippon","L'ukemi"], c:3, t:20},
-  {q:"Quel champion olympique français fait du judo ?", a:["Kylian Mbappé","Teddy Riner","Tony Parker","Antoine Dupont"], c:1, t:15}
+  {q:"Quel champion olympique français fait du judo ?", a:["Kylian Mbappé","Teddy Riner","Tony Parker","Antoine Dupont"], c:1, t:15},
+  {q:"Vrai ou faux : la ceinture noire est la dernière ceinture du judo.", a:["Vrai","Faux","",""], c:1, t:15},
+  {q:"Que fait-on avant et après chaque combat ?", a:["On salue","On se tape dans la main","On crie","On court"], c:0, t:15},
+  {q:"Combien de temps dure un combat de judo chez les grands champions ?", a:["1 minute","4 minutes","10 minutes","1 heure"], c:1, t:20},
+  {q:"En compétition, à quoi sert le judogi bleu ?", a:["À reconnaître les deux combattants","Il est réservé aux champions","Il est pour les débutants","Il porte bonheur"], c:0, t:20},
+  {q:"Comment appelle-t-on l'entraînement en combat libre ?", a:["Le randori","Le kata","Le shido","Le dojo"], c:0, t:20},
+  {q:"Tu fais tomber ton adversaire bien sur le dos, avec force et vitesse : tu marques…", a:["Waza-ari","Ippon","Un but","Un panier"], c:1, t:20},
+  {q:"Que veut dire un « shido » ?", a:["Une pénalité","Un point","Une prise","Un salut"], c:0, t:20},
+  {q:"Avec quel pied monte-t-on sur le tatami quand on a ses chaussures ?", a:["Le pied gauche","Le pied droit","On saute à pieds joints","On n'y monte jamais en chaussures"], c:3, t:20}
 ];
-const loadQ = () => { try { const v = JSON.parse(store.get('csahr-q')); if (Array.isArray(v) && v.length) return v; } catch(e){} return JSON.parse(JSON.stringify(DEFAULT_Q)); };
+const loadQ = () => { try { const v = JSON.parse(store.get('csahr-q-v2')); if (Array.isArray(v) && v.length) return v; } catch(e){} return JSON.parse(JSON.stringify(DEFAULT_Q)); };
 let Q = loadQ();
-const saveQ = () => store.set('csahr-q', JSON.stringify(Q));
+const saveQ = () => store.set('csahr-q-v2', JSON.stringify(Q));
 const validQ = () => Q.filter(q => q.q.trim() && q.a.filter(x => x.trim()).length >= 2 && (q.a[q.c] || '').trim());
 const updateCount = () => { const n = validQ().length; $('#qcount').textContent = `${n} question${n > 1 ? 's' : ''} prête${n > 1 ? 's' : ''}`; };
 
