@@ -71,7 +71,18 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 .step b{font-size:clamp(18px,2.4vw,28px);font-weight:900;word-break:break-word}
 .block{width:100%;border-radius:16px 16px 0 0;display:grid;place-items:center;font-family:Anton,sans-serif;font-size:clamp(40px,6vw,72px);color:#fff;box-shadow:inset 0 -10px 0 rgba(0,0,0,.18)}
 .p1 .block{height:240px;background:var(--yellow);color:#2b1d00}.p2 .block{height:170px;background:#c9cfe6;color:var(--ink)}.p3 .block{height:120px;background:#d58a4a}
-.belt{width:clamp(70px,9vw,110px);height:auto}
+.jk{display:block;overflow:visible}
+.av-s .jk{width:50px;height:60px}#l-players .chip{font-size:20px}.av-m .jk{width:46px;height:55px}.av-big .jk{width:150px;height:180px;filter:drop-shadow(0 8px 0 rgba(0,0,0,.2))}
+.av-p .jk{width:clamp(64px,8vw,104px);height:auto}.chip{padding:4px 16px 4px 6px}
+.maker{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:start;text-align:left}
+.mk-prev{background:#e9edf9;border-radius:16px;display:grid;place-items:center;padding:10px 0;position:sticky;top:8px}
+.mk-prev .jk{width:96px;height:115px}
+.mk-row{margin-bottom:10px}.mk-row b{display:block;font-size:14px;margin-bottom:4px}
+.mk-row div{display:flex;flex-wrap:wrap;gap:6px}
+.sw-b{width:36px;height:36px;border-radius:50%;border:3px solid #d6dbef;cursor:pointer;padding:0}
+.sw-t{min-height:36px;border-radius:10px;border:3px solid #d6dbef;background:#fff;color:var(--ink);font:800 14px Nunito,sans-serif;padding:0 10px;cursor:pointer}
+.sw-b.on,.sw-t.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
+@media(max-width:420px){.maker{grid-template-columns:minmax(0,1fr)}.mk-prev{position:static}}
 /* editor */
 .editor{width:min(100%,900px);display:flex;flex-direction:column;gap:16px;text-align:left}
 .qedit{background:#fff;color:var(--ink);border-radius:18px;padding:18px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
@@ -184,13 +195,16 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
     <input class="code" id="p-code" inputmode="numeric" maxlength="4" placeholder="0000">
     <label for="p-name">Ton prénom ou pseudo</label>
     <input id="p-name" maxlength="16" placeholder="Ex. Léa">
+    <label>Crée ton judoka</label>
+    <div class="maker"><div class="mk-prev" id="mk-prev"></div><div id="mk-opts"></div></div>
+    <button type="button" class="btn alt" id="mk-rand" style="width:100%;margin-top:6px">Au hasard</button>
     <p class="err" id="p-err"></p>
     <button class="btn" style="width:100%" id="p-go">Je rejoins</button>
   </form>
 </section>
 
 <section class="screen" id="p-wait" hidden>
-  <svg class="belt" viewBox="0 0 120 80" aria-hidden="true"><use href="#knot"/></svg>
+  <div class="av-big" id="w-av"></div>
   <h2 id="w-title">C'est bon !</h2>
   <p class="sub" id="w-sub">Regarde le grand écran, ça va commencer…</p>
   <div class="pill" id="w-score" hidden></div>
@@ -217,7 +231,7 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 </section>
 
 <section class="screen" id="p-end" hidden>
-  <svg class="logo" viewBox="0 0 200 200" aria-hidden="true"><use href="#emblem"/></svg>
+  <div class="av-big" id="pe-av"></div>
   <h2 id="pe-title"></h2>
   <div class="pill" id="pe-score"></div>
   <p class="sub">Merci d'avoir joué au Quiz du Dojo !</p>
@@ -268,7 +282,53 @@ const TOPIC = 'judo-csahr-quiz/v2/';
 const rid = () => Math.random().toString(36).slice(2, 10);
 const params = new URLSearchParams(location.search);
 const BELTS = ['#ffffff','#f4d20c','#f08a1c','#14a05b','#2390e8','#7a4a26','#111111','#e5383b'];
-const beltOf = name => { let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0; return BELTS[h % BELTS.length]; };
+/* ---------- Le petit judoka ---------- */
+const SKIN = ['#fbdcc0','#efc49b','#d39a6a','#a86f45','#6e4529'];
+const HAIRC = ['#2a1b10','#5e3518','#a8672e','#e3bd62','#b2381c','#9aa1ad'];
+const STYLES = ['Court','Piquant','Longs','Chignon','Couettes','Rasé'];
+const BELTN = [['Blanche','#ffffff'],['Jaune','#f4d20c'],['Orange','#f08a1c'],['Verte','#14a05b'],['Bleue','#2390e8'],['Marron','#7a4a26'],['Noire','#151515']];
+const GI = [['Blanc','#ffffff','#c9d1e4'],['Bleu','#2456c9','#16398c']];
+const AVK = {s:SKIN.length, c:HAIRC.length, h:STYLES.length, b:BELTN.length, g:GI.length};
+const cleanAv = a => { const o = {}; for (const k in AVK) { const v = a && Number.isInteger(a[k]) ? a[k] : 0; o[k] = Math.min(Math.max(v, 0), AVK[k] - 1); } return o; };
+const randAv = () => { const o = {}; for (const k in AVK) o[k] = Math.floor(Math.random() * AVK[k]); return o; };
+function judoka(a){
+  a = cleanAv(a);
+  const sk = SKIN[a.s], hc = HAIRC[a.c], bl = BELTN[a.b][1], [, gi, gs] = GI[a.g], ln = 'rgba(0,0,0,.28)';
+  const front = {
+    0:`<path d="M26 37 Q26 12 50 12 Q74 12 74 37 Q66 25 50 25 Q34 25 26 37Z" fill="${hc}"/>`,
+    1:`<path d="M26 37 L27 19 L35 24 L38 9 L47 20 L53 6 L59 20 L67 10 L68 23 L75 20 L74 37 Q63 25 50 26 Q37 25 26 37Z" fill="${hc}"/>`,
+    2:`<path d="M25 40 Q24 12 50 12 Q76 12 75 40 Q70 26 56 24 Q46 30 30 30 Q27 34 25 40Z" fill="${hc}"/>`,
+    3:`<circle cx="50" cy="11" r="9" fill="${hc}"/><path d="M26 37 Q26 14 50 14 Q74 14 74 37 Q66 26 50 26 Q34 26 26 37Z" fill="${hc}"/>`,
+    4:`<circle cx="23" cy="34" r="8" fill="${hc}"/><circle cx="77" cy="34" r="8" fill="${hc}"/><path d="M26 37 Q26 13 50 13 Q74 13 74 37 Q66 25 50 25 Q34 25 26 37Z" fill="${hc}"/>`,
+    5:`<path d="M27 32 Q30 14 50 14 Q70 14 73 32 Q62 22 50 22 Q38 22 27 32Z" fill="${hc}" opacity=".45"/>`
+  }[a.h];
+  const back = a.h === 2 ? `<path d="M25 36 Q21 66 29 72 L71 72 Q79 66 75 36 Z" fill="${hc}"/>` : '';
+  return `<svg class="jk" viewBox="0 0 100 122" aria-hidden="true">
+    <ellipse cx="50" cy="118" rx="30" ry="4" fill="rgba(0,0,0,.18)"/>
+    <rect x="33" y="94" width="14" height="21" rx="6" fill="${gi}" stroke="${gs}" stroke-width="2"/>
+    <rect x="53" y="94" width="14" height="21" rx="6" fill="${gi}" stroke="${gs}" stroke-width="2"/>
+    <ellipse cx="39" cy="116" rx="8" ry="4" fill="${sk}"/><ellipse cx="61" cy="116" rx="8" ry="4" fill="${sk}"/>
+    <path d="M30 67 Q17 78 18 92" stroke="${gs}" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <path d="M70 67 Q83 78 82 92" stroke="${gs}" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <path d="M30 67 Q17 78 18 92" stroke="${gi}" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <path d="M70 67 Q83 78 82 92" stroke="${gi}" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <circle cx="18" cy="96" r="6" fill="${sk}"/><circle cx="82" cy="96" r="6" fill="${sk}"/>
+    <path d="M29 64 Q50 56 71 64 L75 99 Q50 105 25 99 Z" fill="${gi}" stroke="${gs}" stroke-width="2"/>
+    <path d="M42 61 L50 75 L58 61 Z" fill="${sk}"/>
+    <path d="M40 61 L50 80 L60 61" fill="none" stroke="${gs}" stroke-width="3"/>
+    <rect x="25" y="84" width="50" height="7" rx="2" fill="${bl}" stroke="${ln}" stroke-width="1.5"/>
+    <path d="M47 90 L41 103 L46 104 L50 92Z M53 90 L59 103 L54 104 L50 92Z" fill="${bl}" stroke="${ln}" stroke-width="1.5"/>
+    <rect x="45" y="82" width="10" height="11" rx="3" fill="${bl}" stroke="${ln}" stroke-width="1.5"/>
+    ${back}
+    <circle cx="50" cy="39" r="24" fill="${sk}"/>
+    <circle cx="27" cy="41" r="4" fill="${sk}"/><circle cx="73" cy="41" r="4" fill="${sk}"/>
+    <circle cx="41" cy="41" r="3.2" fill="#1b1b2b"/><circle cx="59" cy="41" r="3.2" fill="#1b1b2b"/>
+    <circle cx="42" cy="40" r="1" fill="#fff"/><circle cx="60" cy="40" r="1" fill="#fff"/>
+    <circle cx="35" cy="48" r="3.5" fill="#f28b8b" opacity=".45"/><circle cx="65" cy="48" r="3.5" fill="#f28b8b" opacity=".45"/>
+    <path d="M43 50 Q50 56 57 50" fill="none" stroke="#1b1b2b" stroke-width="2.4" stroke-linecap="round"/>
+    ${front}
+  </svg>`;
+}
 const store = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch(e){} } };
 const sstore = { get(k){ try { return sessionStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { sessionStorage.setItem(k,v); } catch(e){} } };
 
@@ -392,7 +452,7 @@ function onHostMsg(pid, m){
     let key = name.toLowerCase(), p = H.players.get(key);
     if (p && p.on && p.pid !== pid) { let n = 2; while (H.players.has((name + ' ' + n).toLowerCase())) n++; name += ' ' + n; key = name.toLowerCase(); p = null; }
     if (!p) { p = {name, key, score:0, ans:{}}; H.players.set(key, p); }
-    p.pid = pid; p.on = true; H.pid2key.set(pid, key);
+    p.pid = pid; p.on = true; p.av = cleanAv(m.av); H.pid2key.set(pid, key);
     H.net.send(pid, {t:'welcome', name:p.name, score:p.score, started:H.phase !== 'lobby'});
     if (H.phase === 'question' && !p.ans[H.qi]) sendQ(pid);
     renderLobby(); renderCount();
@@ -418,7 +478,7 @@ function renderLobby(){
   if (H.phase !== 'lobby') return;
   const ps = [...H.players.values()];
   H.seen = H.seen || new Set();
-  $('#l-players').innerHTML = ps.map(p => `<span class="chip ${p.on ? '' : 'off'} ${H.seen.has(p.key) ? 'old' : ''}"><i style="background:${beltOf(p.name)}"></i>${esc(p.name)}</span>`).join('');
+  $('#l-players').innerHTML = ps.map(p => `<span class="chip ${p.on ? '' : 'off'} ${H.seen.has(p.key) ? 'old' : ''}"><span class="av-s">${judoka(p.av)}</span>${esc(p.name)}</span>`).join('');
   ps.forEach(p => H.seen.add(p.key));
   const n = ps.filter(p => p.on).length;
   $('#l-title').textContent = n ? `${n} judoka${n > 1 ? 's' : ''} sur le tatami` : 'En attente des judokas…';
@@ -463,15 +523,15 @@ function reveal(){
 function showBoard(){
   H.phase = 'board';
   const r = rank().slice(0, 5), top = Math.max(1, r[0] ? r[0].score : 1);
-  $('#b-list').innerHTML = r.map((p, k) => `<div class="brow"><span class="rk">${k + 1}</span><i style="width:22px;height:22px;border-radius:50%;background:${beltOf(p.name)};border:3px solid #0002;flex:none"></i><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('') || '<p class="sub">Personne n\'a encore joué.</p>';
+  $('#b-list').innerHTML = r.map((p, k) => `<div class="brow"><span class="rk">${k + 1}</span><span class="av-m">${judoka(p.av)}</span><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('') || '<p class="sub">Personne n\'a encore joué.</p>';
   show('s-board');
 }
 function endGame(){
   H.phase = 'end'; clearInterval(H.tick);
   const r = rank();
   const order = [1, 0, 2];
-  $('#podium').innerHTML = order.map(k => r[k] ? `<div class="step p${k + 1}"><b>${esc(r[k].name)}</b><span class="pill">${r[k].score} pts</span><div class="block">${k + 1}</div></div>` : '<div class="step"></div>').join('');
-  $('#end-rest').innerHTML = r.slice(3, 10).map((p, k) => `<div class="brow"><span class="rk">${k + 4}</span><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('');
+  $('#podium').innerHTML = order.map(k => r[k] ? `<div class="step p${k + 1}"><span class="av-p">${judoka(r[k].av)}</span><b>${esc(r[k].name)}</b><span class="pill">${r[k].score} pts</span><div class="block">${k + 1}</div></div>` : '<div class="step"></div>').join('');
+  $('#end-rest').innerHTML = r.slice(3, 10).map((p, k) => `<div class="brow"><span class="rk">${k + 4}</span><span class="av-m">${judoka(p.av)}</span><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('');
   show('s-end');
   r.forEach((p, k) => p.on && H.net.send(p.pid, {t:'end', rank:k + 1, n:r.length, score:p.score}));
 }
@@ -500,6 +560,8 @@ function playerJoin(local){
   $('#p-code').value = params.get('code') || '';
   $('#p-name').value = sstore.get('csahr-name') || '';
   $('#p-err').textContent = '';
+  try { P.av = cleanAv(JSON.parse(store.get('csahr-av'))); if (!store.get('csahr-av')) P.av = randAv(); } catch(e){ P.av = randAv(); }
+  renderMaker();
   show('p-join');
   ($('#p-code').value ? $('#p-name') : $('#p-code')).focus();
 }
@@ -509,7 +571,7 @@ function connectPlayer(){
   clearTimeout(P.timer);
   P.timer = setTimeout(() => { if (P.joined) return; $('#p-err').textContent = 'Aucune partie trouvée avec ce code. Vérifie le code et que la partie est bien lancée sur le grand écran.'; $('#p-go').disabled = false; show('p-join'); }, 12000);
   P.net = playerNet(P.code, P.local, {
-    open: () => P.net.send({t:'join', name:P.name}),
+    open: () => P.net.send({t:'join', name:P.name, av:P.av}),
     msg: onPlayerMsg,
     close: () => { $('#lost-msg').textContent = 'Pas de panique, tes points sont gardés.'; show('p-lost'); },
     error: m => { if (P.joined) { $('#lost-msg').textContent = m; show('p-lost'); } else { $('#p-err').textContent = m; $('#p-go').disabled = false; show('p-join'); } }
@@ -525,12 +587,29 @@ $('#p-form').addEventListener('submit', e => {
   connectPlayer();
 });
 $('#lost-retry').onclick = connectPlayer;
+function renderMaker(){
+  const rows = [
+    ['b', 'Ceinture', BELTN.map(([n, c]) => ({bg:c, label:n}))],
+    ['g', 'Judogi', GI.map(([n]) => ({txt:n}))],
+    ['s', 'Peau', SKIN.map((c, i) => ({bg:c, label:'Peau ' + (i + 1)}))],
+    ['h', 'Coiffure', STYLES.map(n => ({txt:n}))],
+    ['c', 'Cheveux', HAIRC.map((c, i) => ({bg:c, label:'Couleur ' + (i + 1)}))]
+  ];
+  $('#mk-prev').innerHTML = judoka(P.av);
+  $('#mk-opts').innerHTML = rows.map(([k, t, opts]) => `<div class="mk-row"><b>${t}</b><div>${opts.map((o, v) =>
+    o.txt ? `<button type="button" class="sw-t ${P.av[k] === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${o.txt}</button>`
+          : `<button type="button" class="sw-b ${P.av[k] === v ? 'on' : ''}" data-k="${k}" data-v="${v}" style="background:${o.bg}" aria-label="${o.label}" title="${o.label}"></button>`).join('')}</div></div>`).join('');
+}
+$('#mk-opts').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+  P.av[b.dataset.k] = +b.dataset.v; store.set('csahr-av', JSON.stringify(P.av)); renderMaker(); });
+$('#mk-rand').onclick = () => { P.av = randAv(); store.set('csahr-av', JSON.stringify(P.av)); renderMaker(); };
 let barRaf = 0;
 function onPlayerMsg(m){
   if (!m || typeof m !== 'object') return;
   if (m.t === 'welcome') {
     P.joined = true; P.name = m.name; $('#p-go').disabled = false;
     $('#w-title').textContent = `C'est bon ${m.name} !`;
+    $('#w-av').innerHTML = judoka(P.av); $('#pe-av').innerHTML = judoka(P.av);
     $('#w-sub').textContent = m.started ? 'Tu es dans la partie, la prochaine question arrive…' : 'Regarde le grand écran, ça va commencer…';
     $('#w-score').hidden = !m.score; $('#w-score').textContent = m.score + ' pts';
     show('p-wait');
