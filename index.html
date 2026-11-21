@@ -3,77 +3,131 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Quiz du Dojo – Judo CSAHR</title>
+<title>Qui sera le plus nul ? · Spécial CSAHR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
 <style>
-/* VOICE: un jeu télé de dojo, joyeux, gros boutons pour enfants
-   IDEA: le tatami — fond bleu judogi quadrillé comme des tatamis, cartes blanches comme le judogi
-   PICTURE: l'emblème CSAHR (cercle rouge + ceinture noire nouée)
-   COLOUR/TYPE: bleu judogi, blanc, rouge ; réponses rouge/jaune/vert/bleu ciel ; Anton + Nunito
-   LAYOUT: un écran par étape, tout centré, 2x2 boutons plein écran sur téléphone */
-:root{--blue:#1a3fb0;--blue-d:#0e2572;--ink:#121735;--white:#fff;--red:#e5383b;--yellow:#f4b30c;--green:#14a05b;--sky:#2390e8;--muted:#5b6386}
+/* VOICE: un jeu télé du vendredi soir pour enfants, drôle, l'école à l'envers
+   IDEA: la salle de classe sur un plateau télé — un grand tableau noir encadré de bois sous les projecteurs
+   PICTURE: le tableau à la craie, l'emblème CSAHR épinglé, les petits judokas élèves (toque de diplômé / bonnet d'âne)
+   COLOUR/TYPE: ardoise verte, craie blanche, bois, projecteurs jaunes + rouge CSAHR ; Anton + Caveat (craie) + Nunito
+   LAYOUT: un écran par moment de l'émission, tout centré ; tableau des matières en grille ; 2x2 gros boutons sur téléphone */
+:root{--night:#0d1226;--slate:#1d3a32;--slate2:#244a3f;--chalk:#f4f1e6;--wood:#9a6233;--ink:#141a33;--red:#e5383b;--yellow:#ffc21a;--green:#14a05b;--sky:#2390e8;--muted:#5b6386}
 *{box-sizing:border-box;min-width:0}
 html,body{height:100%}
-body{margin:0;color:var(--white);font:17px/1.45 Nunito,system-ui,sans-serif;background-color:var(--blue);
-background-image:linear-gradient(rgba(255,255,255,.07) 2px,transparent 2px),linear-gradient(90deg,rgba(255,255,255,.07) 2px,transparent 2px);
-background-size:180px 90px;overflow-x:clip}
+body{margin:0;color:var(--chalk);font:17px/1.45 Nunito,system-ui,sans-serif;overflow-x:clip;background:
+radial-gradient(60% 50% at 12% -8%,rgba(255,194,26,.30),transparent 70%),
+radial-gradient(60% 50% at 88% -8%,rgba(35,144,232,.30),transparent 70%),
+radial-gradient(80% 40% at 50% 115%,rgba(229,56,59,.28),transparent 70%),var(--night);background-attachment:fixed}
 h1,h2,.big{font-family:Anton,Impact,sans-serif;font-weight:400;letter-spacing:.5px;line-height:1.05;margin:0}
-h1{font-size:clamp(40px,7vw,76px)}h2{font-size:clamp(28px,4.5vw,48px)}
-.screen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px max(4vw,16px);text-align:center}
-.screen[hidden]{display:none}
-.card{background:var(--white);color:var(--ink);border-radius:22px;padding:22px;box-shadow:0 10px 0 rgba(0,0,0,.18);width:min(100%,560px)}
+h1{font-size:clamp(40px,7vw,78px)}h2{font-size:clamp(28px,4.4vw,48px)}
+.chalk{font-family:Caveat,cursive;font-weight:700}
+.screen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px max(4vw,16px);text-align:center}
+[hidden]{display:none!important}
+.board{background:linear-gradient(160deg,var(--slate2),var(--slate));border:14px solid var(--wood);border-radius:14px;box-shadow:inset 0 0 60px rgba(0,0,0,.35),0 14px 0 rgba(0,0,0,.3);padding:clamp(18px,3vw,34px);width:min(100%,1180px)}
+.card{background:#fff;color:var(--ink);border-radius:20px;padding:22px;box-shadow:0 10px 0 rgba(0,0,0,.25);width:min(100%,560px)}
 .btn{font:800 18px Nunito,sans-serif;border:0;border-radius:14px;padding:14px 26px;min-height:52px;cursor:pointer;background:var(--red);color:#fff;box-shadow:0 5px 0 #a11d20;transition:transform .08s}
 .btn:active{transform:translateY(3px);box-shadow:0 2px 0 #a11d20}
-.btn.alt{background:#fff;color:var(--blue-d);box-shadow:0 5px 0 #b9c3e6}
-.btn.ghost{background:transparent;color:#fff;box-shadow:none;text-decoration:underline;font-weight:700;min-height:44px;padding:8px 14px}
-.btn:disabled{opacity:.5;cursor:default}
-.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.btn.alt{background:#fff;color:var(--ink);box-shadow:0 5px 0 #b9c3e6}
+.btn.gold{background:var(--yellow);color:#2b1d00;box-shadow:0 5px 0 #b48500}
+.btn.ghost{background:transparent;color:var(--chalk);box-shadow:none;text-decoration:underline;font-weight:800;min-height:44px;padding:8px 14px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.tile-t:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center}
-.logo{width:clamp(120px,22vw,190px);height:auto;filter:drop-shadow(0 8px 0 rgba(0,0,0,.2))}
-.sub{font-weight:800;font-size:clamp(17px,2.2vw,22px);opacity:.9;margin:0}
+.logo{width:clamp(96px,14vw,150px);height:auto;filter:drop-shadow(0 6px 0 rgba(0,0,0,.3))}
+.title-block{display:flex;flex-direction:column;align-items:center;gap:6px}
+.show-title{font-family:Anton,sans-serif;font-size:clamp(44px,8vw,96px);line-height:.95;color:var(--yellow);text-shadow:0 6px 0 var(--red),0 0 40px rgba(255,194,26,.4)}
+.sub{font-weight:800;font-size:clamp(17px,2.2vw,22px);opacity:.92;margin:0}
+.small{font-size:14px;opacity:.85}
 input,select,textarea{font:700 18px Nunito,sans-serif;border:3px solid #d6dbef;border-radius:12px;padding:12px 14px;width:100%;color:var(--ink);background:#fff}
 input.code{font-family:Anton,sans-serif;font-size:34px;text-align:center;letter-spacing:6px}
 label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 .err{color:var(--red);font-weight:800;min-height:1.4em;margin:8px 0 0}
-.small{font-size:14px;opacity:.85}
+.pill{background:rgba(0,0,0,.28);border-radius:999px;padding:8px 20px;font-weight:900;font-size:22px}
+.tag{display:inline-block;border-radius:999px;padding:6px 16px;font-weight:900;color:#fff}
 /* lobby */
-.lobby{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:24px;width:min(100%,1180px);align-items:start}
-.join-box{display:flex;flex-direction:column;align-items:center;gap:12px}
-#qr{background:#fff;padding:14px;border-radius:16px;line-height:0}
-#qr img,#qr canvas{width:min(300px,60vw)!important;height:auto!important}
-.codebig{font-family:Anton,sans-serif;font-size:clamp(56px,9vw,104px);color:var(--ink);letter-spacing:8px;line-height:1}
-.url{font-weight:800;color:var(--blue);word-break:break-all;font-size:16px}
-.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-content:flex-start;min-height:120px}
-.chip{background:#fff;color:var(--ink);border-radius:999px;padding:8px 16px 8px 8px;font-weight:900;display:flex;align-items:center;gap:8px;animation:pop .35s ease-out}
-.chip i{width:26px;height:26px;border-radius:50%;display:inline-block;border:3px solid rgba(0,0,0,.15)}
-.chip.off{opacity:.45}.chip.old{animation:none}
+.lobby{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:24px;width:min(100%,1180px);align-items:start}
+.join-box{display:flex;flex-direction:column;align-items:center;gap:10px}
+#qr{background:#fff;padding:12px;border-radius:16px;line-height:0}
+#qr img,#qr canvas{width:min(280px,60vw)!important;height:auto!important}
+.codebig{font-family:Anton,sans-serif;font-size:clamp(56px,9vw,100px);color:var(--ink);letter-spacing:8px;line-height:1}
+.url{font-weight:800;color:var(--sky);word-break:break-all}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-content:flex-start;min-height:110px}
+.chip{background:#fff;color:var(--ink);border-radius:999px;padding:4px 16px 4px 6px;font-weight:900;display:flex;align-items:center;gap:8px;animation:pop .35s ease-out;font-size:19px}
+.chip.old{animation:none}.chip.off{opacity:.45}.chip.outc{background:#dff5e8}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
-/* question host */
-.qtop{display:flex;justify-content:space-between;align-items:center;width:min(100%,1180px);font-weight:900;font-size:20px}
-.timer{width:92px;height:92px;border-radius:50%;background:#fff;color:var(--ink);display:grid;place-items:center;font-family:Anton,sans-serif;font-size:44px;box-shadow:0 6px 0 rgba(0,0,0,.2)}
+/* matières */
+.subjects{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;width:100%}
+.tile-t{border:0;border-radius:18px;padding:18px 12px;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 7px 0 rgba(0,0,0,.3);font:900 15px Nunito,sans-serif;min-height:150px;justify-content:center;position:relative}
+.tile-t .em{font-size:48px;line-height:1}
+.tile-t b{font-family:Anton,sans-serif;font-weight:400;font-size:clamp(20px,2.2vw,28px);line-height:1.05}
+.tile-t.done{opacity:.4}.tile-t:disabled{cursor:default;filter:grayscale(.6);opacity:.5}
+.tile-t .stamp{position:absolute;top:8px;right:10px;background:#fff;color:var(--ink);border-radius:8px;padding:2px 8px;font-size:13px}
+.tile-t.final{grid-column:span 2;background:linear-gradient(135deg,var(--yellow),#ff8a1c);color:#2b1d00}
+.classbar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+/* question */
+.qtop{display:flex;justify-content:space-between;align-items:center;width:min(100%,1180px);font-weight:900;font-size:20px;gap:10px}
+.timer{width:92px;height:92px;border-radius:50%;background:#fff;color:var(--ink);display:grid;place-items:center;font-family:Anton,sans-serif;font-size:44px;box-shadow:0 6px 0 rgba(0,0,0,.3);flex:none}
 .timer.low{background:var(--red);color:#fff}
-.qtext{background:#fff;color:var(--ink);border-radius:22px;padding:28px;width:min(100%,1180px);font-weight:900;font-size:clamp(26px,3.6vw,46px);line-height:1.15;box-shadow:0 10px 0 rgba(0,0,0,.18);text-wrap:balance}
+.qtext{font-family:Caveat,cursive;font-weight:700;font-size:clamp(34px,4.6vw,60px);line-height:1.1;text-wrap:balance;color:var(--chalk)}
 .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;width:min(100%,1180px)}
-.tile{position:relative;display:flex;align-items:center;gap:16px;padding:20px 22px;border-radius:18px;font-weight:900;font-size:clamp(20px,2.6vw,32px);color:#fff;text-align:left;min-height:96px;box-shadow:0 7px 0 rgba(0,0,0,.25);transition:opacity .3s,transform .3s}
-.tile svg{flex:none;width:46px;height:46px}
-.tile .n{margin-left:auto;font-family:Anton,sans-serif;font-size:34px;background:rgba(0,0,0,.2);border-radius:12px;padding:2px 14px}
-.tile.dim{opacity:.3}.tile.good{transform:scale(1.03);outline:6px solid #fff}
+.tile{position:relative;display:flex;align-items:center;gap:16px;padding:18px 22px;border-radius:18px;font-weight:900;font-size:clamp(20px,2.5vw,30px);color:#fff;text-align:left;min-height:90px;box-shadow:0 7px 0 rgba(0,0,0,.3);transition:opacity .3s,transform .3s}
+.tile svg{flex:none;width:44px;height:44px}
+.tile .n{margin-left:auto;font-family:Anton,sans-serif;font-size:32px;background:rgba(0,0,0,.2);border-radius:12px;padding:2px 14px}
+.tile.dim{opacity:.28}.tile.good{transform:scale(1.03);outline:6px solid #fff}
 .c0{background:var(--red)}.c1{background:var(--yellow);color:#2b1d00}.c2{background:var(--green)}.c3{background:var(--sky)}
 .c1 .n{background:rgba(0,0,0,.12)}
-/* board */
-.board{width:min(100%,760px);display:flex;flex-direction:column;gap:12px}
-.brow{display:flex;align-items:center;gap:14px;background:#fff;color:var(--ink);border-radius:16px;padding:12px 18px;font-weight:900;font-size:22px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
-.brow .rk{font-family:Anton,sans-serif;font-size:30px;width:44px;color:var(--blue)}
-.brow .sc{margin-left:auto;font-family:Anton,sans-serif;font-size:28px}
-.podium{display:flex;align-items:flex-end;justify-content:center;gap:clamp(8px,2vw,22px);width:min(100%,820px)}
-.step{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px}
-.step b{font-size:clamp(18px,2.4vw,28px);font-weight:900;word-break:break-word}
-.block{width:100%;border-radius:16px 16px 0 0;display:grid;place-items:center;font-family:Anton,sans-serif;font-size:clamp(40px,6vw,72px);color:#fff;box-shadow:inset 0 -10px 0 rgba(0,0,0,.18)}
-.p1 .block{height:240px;background:var(--yellow);color:#2b1d00}.p2 .block{height:170px;background:#c9cfe6;color:var(--ink)}.p3 .block{height:120px;background:#d58a4a}
+.exitbar{width:min(100%,1180px);background:rgba(255,255,255,.1);border-radius:16px;padding:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;font-weight:900;font-size:20px}
+/* bulletin */
+.bul{width:min(100%,900px);background:#fffdf4;color:var(--ink);border-radius:8px;padding:22px 26px;box-shadow:0 12px 0 rgba(0,0,0,.3);text-align:left;background-image:repeating-linear-gradient(transparent 0 35px,#c9dcf2 35px 36px);transform:rotate(-.6deg)}
+.bul h2{color:var(--red);font-size:clamp(26px,3.6vw,40px)}
+.brow{display:flex;align-items:center;gap:12px;padding:4px 0;font-weight:900;font-size:20px;min-height:36px}
+.brow .nm{flex:1}
+.brow .note{font-family:Caveat,cursive;font-size:32px;color:var(--red);line-height:1}
+.brow .st{font-size:14px;border-radius:999px;padding:3px 10px;background:#e8ecf7}
+.brow .st.go{background:var(--green);color:#fff}
+/* avatars */
 .jk{display:block;overflow:visible}
-.av-s .jk{width:50px;height:60px}#l-players .chip{font-size:20px}.av-m .jk{width:46px;height:55px}.av-big .jk{width:150px;height:180px;filter:drop-shadow(0 8px 0 rgba(0,0,0,.2))}
-.av-p .jk{width:clamp(64px,8vw,104px);height:auto}.chip{padding:4px 16px 4px 6px}
+.av-s .jk{width:46px;height:55px}.av-m .jk{width:40px;height:48px}.av-big .jk{width:150px;height:180px;filter:drop-shadow(0 8px 0 rgba(0,0,0,.3))}
+.av-p .jk{width:clamp(70px,9vw,120px);height:auto}.av-x .jk{width:clamp(130px,16vw,210px);height:auto;filter:drop-shadow(0 10px 0 rgba(0,0,0,.35))}
+.hat{margin-top:22px}
+.losers{display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-end}
+.loser{display:flex;flex-direction:column;align-items:center;gap:8px}
+.loser b{font-family:Anton,sans-serif;font-size:clamp(30px,4vw,48px);font-weight:400;color:var(--yellow)}
+.trophy{font-size:64px;line-height:1;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-6deg)}}
+.dipl{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:min(100%,1000px)}
+.dchip{background:#fff;color:var(--ink);border-radius:14px;padding:6px 12px 6px 6px;display:flex;align-items:center;gap:8px;font-weight:900}
+.dchip .rk{font-family:Anton,sans-serif;color:var(--sky);font-size:20px}
+/* editor */
+.editor{width:min(100%,900px);display:flex;flex-direction:column;gap:14px;text-align:left}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:min(100%,900px)}
+.tabs button{border:0;border-radius:999px;padding:10px 16px;font:900 15px Nunito;color:#fff;cursor:pointer;opacity:.6;min-height:44px}
+.tabs button.on{opacity:1;outline:3px solid #fff}
+.qedit{background:#fff;color:var(--ink);border-radius:18px;padding:16px;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.qedit .head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:900}
+.qedit textarea{min-height:60px;resize:vertical}
+.ans{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:10px}
+.ans label{display:flex;align-items:center;gap:8px;margin:0;font-weight:700}
+.ans input[type=radio]{width:24px;height:24px;flex:none;accent-color:var(--green)}
+.ans .sw{width:16px;align-self:stretch;border-radius:6px;flex:none}
+.x{background:none;border:0;color:var(--red);font:800 15px Nunito;cursor:pointer;min-height:44px;padding:0 8px}
+.hint{background:rgba(255,255,255,.12);border-radius:14px;padding:12px 16px;font-weight:700}
+.sticky{position:sticky;bottom:0;padding:14px;background:var(--night);border-radius:18px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:min(100%,900px);box-shadow:0 -6px 20px rgba(0,0,0,.4)}
+/* joueur */
+.pq{padding:12px;gap:12px;justify-content:flex-start}
+.pq .qmini{background:var(--slate);border:6px solid var(--wood);border-radius:14px;padding:12px;font-family:Caveat,cursive;font-size:26px;width:100%;line-height:1.1}
+.bar{width:100%;height:10px;background:rgba(255,255,255,.2);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--yellow);width:100%}
+.pbtns{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%}
+.pbtns.two{grid-template-columns:minmax(0,1fr)}
+.pbtn{border:0;border-radius:20px;color:#fff;font:900 clamp(18px,5vw,26px) Nunito,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;box-shadow:0 7px 0 rgba(0,0,0,.3);cursor:pointer;min-height:110px}
+.pbtn svg{width:clamp(44px,13vw,70px);height:auto}
+.pbtn:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.3)}
+.verdict{font-family:Anton,sans-serif;font-size:clamp(52px,15vw,104px);line-height:1}
+.res-ok{background:var(--green)}.res-ko{background:var(--red)}.res-pub{background:#3a4470}
+.spin{width:64px;height:64px;border-radius:50%;border:7px solid rgba(255,255,255,.3);border-top-color:#fff;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
 .maker{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:start;text-align:left}
 .mk-prev{background:#e9edf9;border-radius:16px;display:grid;place-items:center;padding:10px 0;position:sticky;top:8px}
 .mk-prev .jk{width:96px;height:115px}
@@ -81,40 +135,18 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 .mk-row div{display:flex;flex-wrap:wrap;gap:6px}
 .sw-b{width:36px;height:36px;border-radius:50%;border:3px solid #d6dbef;cursor:pointer;padding:0}
 .sw-t{min-height:36px;border-radius:10px;border:3px solid #d6dbef;background:#fff;color:var(--ink);font:800 14px Nunito,sans-serif;padding:0 10px;cursor:pointer}
-.sw-b.on,.sw-t.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
-@media(max-width:420px){.maker{grid-template-columns:minmax(0,1fr)}.mk-prev{position:static}}
-/* editor */
-.editor{width:min(100%,900px);display:flex;flex-direction:column;gap:16px;text-align:left}
-.qedit{background:#fff;color:var(--ink);border-radius:18px;padding:18px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
-.qedit .head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:900}
-.qedit textarea{min-height:64px;resize:vertical}
-.ans{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:10px}
-.ans label{display:flex;align-items:center;gap:8px;margin:0;font-weight:700}
-.ans input[type=radio]{width:24px;height:24px;flex:none;accent-color:var(--green)}
-.ans .sw{width:16px;align-self:stretch;border-radius:6px;flex:none}
-.x{background:none;border:0;color:var(--red);font:800 15px Nunito;cursor:pointer;min-height:44px;padding:0 8px}
-.sticky{position:sticky;bottom:0;padding:14px;background:var(--blue-d);border-radius:18px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:min(100%,900px)}
-/* player */
-.pq{padding:12px;gap:12px;justify-content:flex-start}
-.pq .qmini{background:#fff;color:var(--ink);border-radius:16px;padding:14px;font-weight:900;font-size:19px;width:100%;line-height:1.2}
-.bar{width:100%;height:10px;background:rgba(255,255,255,.25);border-radius:9px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--yellow);width:100%}
-.pbtns{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%}
-.pbtns.two{grid-template-columns:minmax(0,1fr)}
-.pbtn{border:0;border-radius:20px;color:#fff;font:900 clamp(18px,5vw,26px) Nunito,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;box-shadow:0 7px 0 rgba(0,0,0,.25);cursor:pointer;min-height:120px}
-.pbtn svg{width:clamp(46px,14vw,74px);height:auto}
-.pbtn:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.25)}
-.verdict{font-family:Anton,sans-serif;font-size:clamp(56px,16vw,110px);line-height:1}
-.res-ok{background:var(--green)}.res-ko{background:var(--red)}
-.pill{background:rgba(0,0,0,.22);border-radius:999px;padding:8px 20px;font-weight:900;font-size:22px}
-.spin{width:64px;height:64px;border-radius:50%;border:7px solid rgba(255,255,255,.3);border-top-color:#fff;animation:sp 1s linear infinite}
-@keyframes sp{to{transform:rotate(360deg)}}
+.sw-b.on,.sw-t.on{border-color:var(--sky);box-shadow:0 0 0 2px var(--sky)}
+.status{font-weight:900;border-radius:999px;padding:6px 14px;background:rgba(255,255,255,.15)}
 .fs{position:fixed;top:12px;right:12px;z-index:5}
-.overlay{position:fixed;inset:0;background:rgba(8,16,50,.75);display:grid;place-items:center;padding:16px;z-index:10;color:var(--ink);text-align:center}
+.overlay{position:fixed;inset:0;background:rgba(5,8,20,.8);display:grid;place-items:center;padding:16px;z-index:10;color:var(--ink);text-align:center}
 .overlay[hidden]{display:none}
-#aqr img,#aqr canvas{width:min(260px,60vw)!important;height:auto!important}
-@media(max-width:800px){.lobby{grid-template-columns:minmax(0,1fr)}.tiles{grid-template-columns:minmax(0,1fr)}.tile{min-height:70px}.p1 .block{height:170px}.p2 .block{height:120px}.p3 .block{height:90px}}
-@media(max-width:600px){.ans{grid-template-columns:minmax(0,1fr)}}
+#aqr img,#aqr canvas{width:min(240px,60vw)!important;height:auto!important}
+.a-themes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(100%,460px)}
+.a-themes .tile-t{min-height:90px}.a-themes .tile-t .em{font-size:30px}.a-themes .tile-t b{font-size:18px}
+@media(max-width:900px){.subjects{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.lobby{grid-template-columns:minmax(0,1fr)}.tiles{grid-template-columns:minmax(0,1fr)}.tile{min-height:66px}}
+@media(max-width:600px){.ans{grid-template-columns:minmax(0,1fr)}.board{border-width:8px}}
+@media(max-width:420px){.maker{grid-template-columns:minmax(0,1fr)}.mk-prev{position:static}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -123,14 +155,14 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 <!-- ============ ANIMATEUR ============ -->
 <section class="screen" id="s-home">
   <svg class="logo" viewBox="0 0 200 200" aria-label="Emblème Judo CSAHR"><use href="#emblem"/></svg>
-  <h1>Le Quiz du Dojo</h1>
-  <p class="sub">Judo CSAHR · scanne, réponds, marque l'ippon !</p>
+  <div class="title-block"><div class="show-title">Qui sera<br>le plus nul ?</div><span class="chalk" style="font-size:34px">Spécial CSAHR</span></div>
+  <p class="sub">Bien répondre, c'est sortir de la classe. Le dernier qui reste… est le plus nul !</p>
   <div class="row">
-    <button class="btn" id="b-host">Lancer une partie</button>
+    <button class="btn" id="b-host">Ouvrir la classe</button>
     <button class="btn alt" id="b-edit">Modifier les questions</button>
   </div>
   <div class="row">
-    <button class="btn ghost" id="b-iamplayer">Je suis joueur</button>
+    <button class="btn ghost" id="b-iamplayer">Je suis élève</button>
     <button class="btn ghost" id="b-local">Tester sur cet ordi</button>
   </div>
   <p class="small" id="qcount"></p>
@@ -138,31 +170,31 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 
 <section class="screen" id="s-edit" hidden style="justify-content:flex-start">
   <h2>Les questions</h2>
-  <p class="sub small">Coche la bonne réponse. Laisse une case vide pour avoir 2 ou 3 réponses (ex. vrai/faux). Tout est enregistré sur cet ordinateur.</p>
+  <div class="tabs" id="e-tabs"></div>
+  <p class="hint" id="e-hint" style="width:min(100%,900px)"></p>
   <div class="editor" id="qlist"></div>
   <div class="sticky">
     <button class="btn alt" id="e-add">+ Ajouter une question</button>
-    <button class="btn ghost" id="e-reset">Remettre les questions judo</button>
+    <button class="btn ghost" id="e-reset">Remettre les questions de base</button>
     <button class="btn" id="e-done">Terminé</button>
   </div>
-  <p class="err" id="e-err"></p>
 </section>
 
 <section class="screen" id="s-lobby" hidden>
   <div class="lobby">
     <div class="card join-box">
-      <strong style="font-size:20px">Scanne pour jouer</strong>
+      <strong style="font-size:20px">Scanne pour entrer en classe</strong>
       <div id="qr"></div>
       <span class="small">ou va sur <span class="url" id="l-url"></span></span>
-      <span>Code de la partie</span>
+      <span>Code de la classe</span>
       <div class="codebig" id="l-code">····</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:18px;align-items:center">
-      <h2 id="l-title">En attente des judokas…</h2>
+    <div class="board" style="display:flex;flex-direction:column;gap:16px;align-items:center">
+      <h2 id="l-title">La classe attend ses élèves…</h2>
       <p class="sub" id="l-status">Connexion au serveur…</p>
       <div class="chips" id="l-players"></div>
       <div class="row">
-        <button class="btn" id="l-start" disabled>Commencer</button>
+        <button class="btn gold" id="l-start" disabled>Sonner la rentrée</button>
         <button class="btn alt" id="l-admin">Télécommande</button>
         <button class="btn ghost" id="l-quit">Retour</button>
       </div>
@@ -170,32 +202,46 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   </div>
 </section>
 
-<section class="screen" id="s-q" hidden>
-  <div class="qtop"><span id="q-num">Question 1/10</span><div class="timer" id="q-timer">20</div><span id="q-count">0 réponse</span></div>
-  <div class="qtext" id="q-text"></div>
-  <div class="tiles" id="q-tiles"></div>
-  <div class="row"><button class="btn alt" id="q-skip">Arrêter le chrono</button><button class="btn" id="q-next" hidden>Classement</button></div>
+<section class="screen" id="s-menu" hidden>
+  <div class="title-block"><h2>Emploi du temps</h2><span class="chalk" style="font-size:30px" id="m-sub"></span></div>
+  <div class="board"><div class="subjects" id="m-tiles"></div></div>
+  <div class="classbar" id="m-class"></div>
 </section>
 
-<section class="screen" id="s-board" hidden>
-  <h2>Classement</h2>
-  <div class="board" id="b-list"></div>
-  <button class="btn" id="b-next">Question suivante</button>
+<section class="screen" id="s-intro" hidden>
+  <div class="big" id="i-em" style="font-size:110px"></div>
+  <h1 id="i-name"></h1>
+  <p class="sub" id="i-rule" style="max-width:820px"></p>
+  <button class="btn gold" id="i-go">C'est parti !</button>
+</section>
+
+<section class="screen" id="s-q" hidden>
+  <div class="qtop"><span class="tag" id="q-tag"></span><div class="timer" id="q-timer">20</div><span id="q-count">0 réponse</span></div>
+  <div class="board"><div class="qtext" id="q-text"></div></div>
+  <div class="tiles" id="q-tiles"></div>
+  <div class="exitbar" id="q-exit" hidden></div>
+  <div class="row"><button class="btn alt" id="q-skip">Arrêter le chrono</button><button class="btn gold" id="q-next" hidden>Suivant</button></div>
+</section>
+
+<section class="screen" id="s-bul" hidden>
+  <div class="bul" id="bul"></div>
+  <button class="btn gold" id="bul-next">Retour à l'emploi du temps</button>
 </section>
 
 <section class="screen" id="s-end" hidden>
-  <h1>Podium !</h1>
-  <div class="podium" id="podium"></div>
-  <div class="board" id="end-rest"></div>
-  <div class="row"><button class="btn" id="end-again">Rejouer</button><button class="btn ghost" id="end-home">Accueil</button></div>
+  <p class="chalk" style="font-size:38px;margin:0" id="e-pre">Et le plus nul est…</p>
+  <div class="losers" id="e-losers"></div>
+  <p class="sub" id="e-sub"></p>
+  <h2 style="font-size:28px;margin-top:10px">Les diplômés, dans l'ordre de sortie</h2>
+  <div class="dipl" id="e-dipl"></div>
+  <div class="row"><button class="btn gold" id="end-again">Nouvelle rentrée</button><button class="btn ghost" id="end-home">Accueil</button></div>
 </section>
 
-<!-- ============ JOUEUR ============ -->
+<!-- ============ ÉLÈVE ============ -->
 <section class="screen" id="p-join" hidden>
-  <svg class="logo" viewBox="0 0 200 200" aria-hidden="true"><use href="#emblem"/></svg>
-  <h2>Monte sur le tatami !</h2>
+  <div class="title-block"><div class="show-title" style="font-size:clamp(38px,12vw,64px)">Qui sera<br>le plus nul ?</div><span class="chalk" style="font-size:26px">Spécial CSAHR</span></div>
   <form class="card" id="p-form" autocomplete="off">
-    <label for="p-code">Code de la partie</label>
+    <label for="p-code">Code de la classe</label>
     <input class="code" id="p-code" inputmode="numeric" maxlength="4" placeholder="0000">
     <label for="p-name">Ton prénom ou pseudo</label>
     <input id="p-name" maxlength="16" placeholder="Ex. Léa">
@@ -203,19 +249,19 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
     <div class="maker"><div class="mk-prev" id="mk-prev"></div><div id="mk-opts"></div></div>
     <button type="button" class="btn alt" id="mk-rand" style="width:100%;margin-top:6px">Au hasard</button>
     <p class="err" id="p-err"></p>
-    <button class="btn" style="width:100%" id="p-go">Je rejoins</button>
+    <button class="btn" style="width:100%" id="p-go">J'entre en classe</button>
   </form>
 </section>
 
 <section class="screen" id="p-wait" hidden>
   <div class="av-big" id="w-av"></div>
+  <span class="status" id="w-status">En classe</span>
   <h2 id="w-title">C'est bon !</h2>
   <p class="sub" id="w-sub">Regarde le grand écran, ça va commencer…</p>
-  <div class="pill" id="w-score" hidden></div>
 </section>
 
 <section class="screen pq" id="p-q" hidden>
-  <div class="qtop" style="font-size:16px"><span id="pq-num"></span><span id="pq-name"></span></div>
+  <div class="qtop" style="font-size:15px"><span class="tag" id="pq-tag"></span><span id="pq-status"></span></div>
   <div class="bar"><i id="pq-bar"></i></div>
   <div class="qmini" id="pq-text"></div>
   <div class="pbtns" id="pq-btns"></div>
@@ -224,35 +270,34 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 <section class="screen" id="p-sent" hidden>
   <div class="spin"></div>
   <h2>Réponse envoyée !</h2>
-  <p class="sub">On attend les autres judokas…</p>
+  <p class="sub">On attend les autres élèves…</p>
 </section>
 
 <section class="screen" id="p-res" hidden>
   <div class="verdict" id="r-verdict"></div>
   <p class="sub" id="r-sub"></p>
-  <div class="pill" id="r-pts"></div>
-  <p class="sub" id="r-rank"></p>
+  <div class="pill" id="r-pill"></div>
 </section>
 
 <section class="screen" id="p-end" hidden>
-  <div class="av-big" id="pe-av"></div>
+  <div class="av-big hat" id="pe-av"></div>
   <h2 id="pe-title"></h2>
-  <div class="pill" id="pe-score"></div>
-  <p class="sub">Merci d'avoir joué au Quiz du Dojo !</p>
+  <p class="sub" id="pe-sub"></p>
 </section>
 
 <section class="screen" id="p-lost" hidden>
   <h2>Connexion perdue</h2>
-  <p class="sub" id="lost-msg">Pas de panique, tes points sont gardés.</p>
-  <button class="btn" id="lost-retry">Revenir dans la partie</button>
+  <p class="sub" id="lost-msg">Pas de panique, tu gardes ta place.</p>
+  <button class="btn" id="lost-retry">Revenir en classe</button>
 </section>
 
+<!-- ============ TÉLÉCOMMANDE ============ -->
 <div class="overlay" id="admin-ov" hidden>
   <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:12px">
-    <h2 style="color:var(--blue-d)">Télécommande animateur</h2>
-    <p style="margin:0">Scanne avec <b>ton</b> téléphone pour faire défiler les questions à distance. Ne montre pas ce QR aux enfants.</p>
+    <h2 style="color:var(--ink)">Télécommande animateur</h2>
+    <p style="margin:0">Scanne avec <b>ton</b> téléphone pour piloter l'émission. Ne montre pas ce QR aux élèves.</p>
     <div id="aqr" style="line-height:0"></div>
-    <a id="a-link" target="_blank" class="small" style="color:var(--blue)">Ouvrir le lien de la télécommande</a>
+    <a id="a-link" target="_blank" class="small" style="color:var(--sky)">Ouvrir le lien de la télécommande</a>
     <button class="btn" id="a-close">Fermer</button>
   </div>
 </div>
@@ -265,9 +310,9 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
     <div id="a-q" style="font-weight:900;font-size:20px;line-height:1.2;margin:6px 0"></div>
     <div id="a-good" style="font-weight:800;color:var(--green)"></div>
     <div id="a-info" style="font-weight:800;margin-top:8px"></div>
-    <div id="a-top" class="small" style="margin-top:8px;color:var(--ink)"></div>
   </div>
-  <button class="btn" id="a-next" style="width:min(100%,420px);min-height:84px;font-size:24px" disabled>…</button>
+  <div class="a-themes" id="a-themes" hidden></div>
+  <button class="btn gold" id="a-next" style="width:min(100%,460px);min-height:84px;font-size:24px" disabled>…</button>
   <button class="btn alt" id="a-skip" hidden>Arrêter le chrono</button>
   <p class="err" id="a-err" style="color:#fff"></p>
 </section>
@@ -281,7 +326,6 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
       <path d="M52 34 L34 76 L48 78 L60 44 Z" fill="#111"/>
       <path d="M68 34 L86 76 L72 78 L60 44 Z" fill="#1b1b1b"/>
       <rect x="47" y="16" width="26" height="28" rx="6" fill="#222"/>
-      <rect x="47" y="16" width="26" height="6" rx="3" fill="#3a3a3a"/>
     </g>
     <g id="emblem">
       <circle cx="100" cy="100" r="96" fill="#fff"/>
@@ -307,10 +351,12 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const show = id => { document.querySelectorAll('.screen').forEach(e => e.hidden = e.id !== id); window.scrollTo(0, 0); };
 const shape = i => `<svg viewBox="0 0 48 48" aria-hidden="true"><use href="#sh${i}"/></svg>`;
 const BROKER = 'wss://broker.hivemq.com:8884/mqtt';
-const TOPIC = 'judo-csahr-quiz/v2/';
+const TOPIC = 'csahr-plusnul/v1/';
 const rid = () => Math.random().toString(36).slice(2, 10);
 const params = new URLSearchParams(location.search);
-const BELTS = ['#ffffff','#f4d20c','#f08a1c','#14a05b','#2390e8','#7a4a26','#111111','#e5383b'];
+const store = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch(e){} } };
+const sstore = { get(k){ try { return sessionStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { sessionStorage.setItem(k,v); } catch(e){} } };
+
 /* ---------- Le petit judoka ---------- */
 const SKIN = ['#fbdcc0','#efc49b','#d39a6a','#a86f45','#6e4529'];
 const HAIRC = ['#2a1b10','#5e3518','#a8672e','#e3bd62','#b2381c','#9aa1ad'];
@@ -320,7 +366,11 @@ const GI = [['Blanc','#ffffff','#c9d1e4'],['Bleu','#2456c9','#16398c']];
 const AVK = {s:SKIN.length, c:HAIRC.length, h:STYLES.length, b:BELTN.length, g:GI.length};
 const cleanAv = a => { const o = {}; for (const k in AVK) { const v = a && Number.isInteger(a[k]) ? a[k] : 0; o[k] = Math.min(Math.max(v, 0), AVK[k] - 1); } return o; };
 const randAv = () => { const o = {}; for (const k in AVK) o[k] = Math.floor(Math.random() * AVK[k]); return o; };
-function judoka(a){
+const HATS = {
+  grad:`<path d="M20 19 L50 6 L80 19 L50 32Z" fill="#141414"/><path d="M34 22 L34 30 Q50 36 66 30 L66 22 L50 29Z" fill="#222"/><path d="M76 20 L76 33" stroke="#ffc21a" stroke-width="2.5"/><circle cx="76" cy="35" r="3" fill="#ffc21a"/>`,
+  dunce:`<path d="M33 22 L50 -30 L67 22 Z" fill="#ffc21a" stroke="#9a6d00" stroke-width="2"/><path d="M37 10 L63 10 L61 16 L39 16Z" fill="#e5383b"/><text x="50" y="4" text-anchor="middle" font-family="Anton,sans-serif" font-size="11" fill="#9a6d00">ÂNE</text><circle cx="50" cy="-30" r="4" fill="#e5383b"/>`
+};
+function judoka(a, hat){
   a = cleanAv(a);
   const sk = SKIN[a.s], hc = HAIRC[a.c], bl = BELTN[a.b][1], [, gi, gs] = GI[a.g], ln = 'rgba(0,0,0,.28)';
   const front = {
@@ -355,43 +405,110 @@ function judoka(a){
     <circle cx="42" cy="40" r="1" fill="#fff"/><circle cx="60" cy="40" r="1" fill="#fff"/>
     <circle cx="35" cy="48" r="3.5" fill="#f28b8b" opacity=".45"/><circle cx="65" cy="48" r="3.5" fill="#f28b8b" opacity=".45"/>
     <path d="M43 50 Q50 56 57 50" fill="none" stroke="#1b1b2b" stroke-width="2.4" stroke-linecap="round"/>
-    ${front}
+    ${front}${hat ? HATS[hat] : ''}
   </svg>`;
 }
-const store = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch(e){} } };
-const sstore = { get(k){ try { return sessionStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { sessionStorage.setItem(k,v); } catch(e){} } };
 
-/* ---------- Questions ---------- */
-const DEFAULT_Q = [
-  {q:"Comment s'appelle la tenue du judoka ?", a:["Le tatami","Le judogi","Le dojo","Le randori"], c:1, t:20},
-  {q:"Dans quel pays le judo est-il né ?", a:["En Chine","En Corée","Au Japon","En Thaïlande"], c:2, t:20},
-  {q:"Combien de fois peut-on marquer ippon dans un même combat ?", a:["Une seule fois","Deux fois","Trois fois","Autant qu'on veut"], c:0, t:20},
-  {q:"Qui a inventé le judo ?", a:["Bruce Lee","Teddy Riner","Jigoro Kano","Mario"], c:2, t:20},
-  {q:"Que veut dire « Hajime » ?", a:["Arrêtez","Commencez","Saluez","Bravo"], c:1, t:20},
-  {q:"Que veut dire « Matte » ?", a:["Mettez-vous en garde","Arrêtez","Matez l'adversaire","Mangez"], c:1, t:20},
-  {q:"Quelle ceinture n'existe PAS au judo en France ?", a:["Jaune","Orange","Rose","Marron"], c:2, t:20},
-  {q:"Comment s'appelle la salle où l'on fait du judo ?", a:["Le ring","Le dojo","Le terrain","La cage"], c:1, t:15},
-  {q:"« Judo » veut dire…", a:["La voie de la souplesse","La force du tigre","Le combat rapide","L'art du poing"], c:0, t:20},
-  {q:"Au judo, a-t-on le droit de donner des coups de poing ?", a:["Oui, dans le ventre","Oui, si l'arbitre ne voit pas","Non, jamais","Seulement en finale"], c:2, t:20},
-  {q:"Comment s'appelle l'art de bien tomber ?", a:["Le kata","Le randori","L'ippon","L'ukemi"], c:3, t:20},
-  {q:"Quel champion olympique français fait du judo ?", a:["Kylian Mbappé","Teddy Riner","Tony Parker","Antoine Dupont"], c:1, t:15},
-  {q:"Vrai ou faux : la ceinture noire est la dernière ceinture du judo.", a:["Vrai","Faux","",""], c:1, t:15},
-  {q:"Que fait-on avant et après chaque combat ?", a:["On salue","On se tape dans la main","On crie","On court"], c:0, t:15},
-  {q:"Combien de temps dure un combat de judo chez les grands champions ?", a:["1 minute","4 minutes","10 minutes","1 heure"], c:1, t:20},
-  {q:"En compétition, à quoi sert le judogi bleu ?", a:["À reconnaître les deux combattants","Il est réservé aux champions","Il est pour les débutants","Il porte bonheur"], c:0, t:20},
-  {q:"Comment appelle-t-on l'entraînement en combat libre ?", a:["Le randori","Le kata","Le shido","Le dojo"], c:0, t:20},
-  {q:"Tu fais tomber ton adversaire bien sur le dos, avec force et vitesse : tu marques…", a:["Waza-ari","Ippon","Un but","Un panier"], c:1, t:20},
-  {q:"Que veut dire un « shido » ?", a:["Une pénalité","Un point","Une prise","Un salut"], c:0, t:20},
-  {q:"Avec quel pied monte-t-on sur le tatami quand on a ses chaussures ?", a:["Le pied gauche","Le pied droit","On saute à pieds joints","On n'y monte jamais en chaussures"], c:3, t:20}
+/* ---------- Les matières et les questions ---------- */
+const Q = (q, a, c, t = 20) => ({q, a, c, t});
+const DEFAULT_THEMES = [
+  {id:'sport', name:'Sport', emoji:'⚽', color:'#14a05b', qs:[
+    Q("Quel pays a gagné la Coupe du monde de football 2026 ?", ["La France","L'Argentine","L'Espagne","Le Brésil"], 2),
+    Q("Avec 22 buts, quel Français est devenu le meilleur buteur de l'histoire de la Coupe du monde ?", ["Kylian Mbappé","Ousmane Dembélé","Antoine Griezmann","Olivier Giroud"], 0),
+    Q("Qui a gagné le Tour de France 2026, son 5e ?", ["Jonas Vingegaard","Tadej Pogačar","Remco Evenepoel","Paul Seixas"], 1),
+    Q("Qui a gagné le Ballon d'Or 2026 ?", ["Kylian Mbappé","Lamine Yamal","Harry Kane","Ousmane Dembélé"], 2),
+    Q("Combien de médailles la France a-t-elle gagnées aux JO d'hiver 2026, un record ?", ["8","15","23","40"], 2),
+    Q("Dans quel sport la France a-t-elle gagné le plus de médailles aux JO d'hiver 2026 ?", ["Le ski alpin","Le biathlon","Le patinage","Le bobsleigh"], 1),
+    Q("Combien de joueurs a une équipe de foot sur le terrain ?", ["9","10","11","12"], 2, 15),
+    Q("Sur quelle surface se joue le tournoi de Roland-Garros ?", ["Le gazon","La terre battue","Le béton","La moquette"], 1),
+    Q("Quelle équipe NBA a choisi Victor Wembanyama en 2023 ?", ["Les Lakers","Les Spurs de San Antonio","Les Bulls","Les Celtics"], 1),
+    Q("Dans quelle ville auront lieu les Jeux olympiques d'été 2028 ?", ["Los Angeles","Paris","Tokyo","Londres"], 0)
+  ]},
+  {id:'perso', name:'Personnalités', emoji:'🌟', color:'#ff4f9a', qs:[
+    Q("Quel YouTubeur organise la course de voitures GP Explorer ?", ["Squeezie","Inoxtag","Michou","Tibo InShape"], 0),
+    Q("Quel YouTubeur a gravi l'Everest pour son film « Kaizen » ?", ["Squeezie","Inoxtag","Amixem","Mister V"], 1),
+    Q("Qui est la première Française à être sortie dans l'espace ?", ["Claudie Haigneré","Sophie Adenot","Thomas Pesquet","Marie Curie"], 1),
+    Q("Qui présente « Qui sera le plus nul ? » sur TF1 ?", ["Cyril Hanouna","Camille Combal","Nikos Aliagas","Arthur"], 1),
+    Q("Qui a été sacrée la plus nulle de la saison 2 de « Qui sera le plus nul ? » ?", ["Nabilla","Chocoh","Mélanie Da Cruz","Blandine Lehout"], 1),
+    Q("Dans quel sport Léon Marchand est-il champion olympique ?", ["La natation","L'athlétisme","Le judo","Le cyclisme"], 0),
+    Q("Dans quel club joue Kylian Mbappé ?", ["Le PSG","Le Real Madrid","Le FC Barcelone","Monaco"], 1),
+    Q("Qui a écrit les livres Harry Potter ?", ["J.K. Rowling","Roald Dahl","J.R.R. Tolkien","Stephen King"], 0),
+    Q("Quel acteur joue Spider-Man aux côtés de Zendaya ?", ["Tobey Maguire","Tom Holland","Timothée Chalamet","Andrew Garfield"], 1)
+  ]},
+  {id:'musique', name:'Musique', emoji:'🎵', color:'#8b5cf6', qs:[
+    Q("Quel pays a gagné l'Eurovision 2026 ?", ["La France","La Bulgarie","Israël","La Finlande"], 1),
+    Q("Comment s'appelle la chanson gagnante de l'Eurovision 2026 ?", ["« Bangaranga »","« Regarde ! »","« Michelle »","« Wasted Love »"], 0),
+    Q("Qui a représenté la France à l'Eurovision 2026 ?", ["Louane","Monroe","Slimane","Aya Nakamura"], 1),
+    Q("Quelle chanteuse a chanté avec la Garde républicaine à l'ouverture des JO de Paris 2024 ?", ["Aya Nakamura","Angèle","Céline Dion","Lady Gaga"], 0),
+    Q("De quel pays vient le chanteur Stromae ?", ["La France","La Belgique","La Suisse","Le Canada"], 1),
+    Q("Quel chanteur est surnommé « le roi de la pop » ?", ["Elvis Presley","Michael Jackson","Freddie Mercury","Justin Bieber"], 1),
+    Q("Combien de cordes a une guitare classique ?", ["4","5","6","8"], 2, 15),
+    Q("Dans quelle ville le rappeur Orelsan a-t-il grandi ?", ["Marseille","Caen","Paris","Lyon"], 1),
+    Q("Quel instrument a des touches noires et blanches ?", ["Le violon","Le piano","La batterie","La flûte"], 1, 15)
+  ]},
+  {id:'actu', name:'Actualités', emoji:'📰', color:'#18a7f0', qs:[
+    Q("Quel judoka a annoncé le 9 novembre 2026 être candidat à l'élection présidentielle ?", ["Clarisse Agbégnénou","Teddy Riner","Joan-Benjamin Gaba","David Douillet"], 1),
+    Q("Combien de jours l'astronaute Sophie Adenot a-t-elle passés dans la Station spatiale internationale ?", ["35","135","235","535"], 2),
+    Q("Dans quels pays s'est jouée la Coupe du monde de foot 2026 ?", ["France, Espagne et Portugal","États-Unis, Canada et Mexique","Brésil et Argentine","Au Qatar"], 1),
+    Q("Combien d'équipes ont joué la Coupe du monde 2026, un record ?", ["24","32","48","64"], 2),
+    Q("Dans quel pays se sont déroulés les JO d'hiver 2026 ?", ["En France","En Italie","En Suisse","En Norvège"], 1),
+    Q("Dans quelle ville a eu lieu l'Eurovision 2026 ?", ["Vienne","Paris","Sofia","Stockholm"], 0),
+    Q("Dans quelle ville a eu lieu la cérémonie du Ballon d'Or 2026, pour la première fois ?", ["Paris","Londres","Madrid","Milan"], 1),
+    Q("Quel jeune Français de 19 ans a fini 4e du Tour de France 2026 ?", ["Paul Seixas","Julian Alaphilippe","Romain Bardet","Thibaut Pinot"], 0)
+  ]},
+  {id:'cg', name:'Culture G', emoji:'🧠', color:'#ff8a1c', qs:[
+    Q("Quelle est la capitale de l'Australie ?", ["Sydney","Melbourne","Canberra","Perth"], 2),
+    Q("Quelle est la plus grande planète du système solaire ?", ["La Terre","Jupiter","Saturne","Mars"], 1),
+    Q("Quel est le plus long fleuve de France ?", ["La Seine","La Loire","Le Rhône","La Garonne"], 1),
+    Q("Combien de pattes a une araignée ?", ["6","8","10","12"], 1, 15),
+    Q("Qui a écrit « Le Petit Prince » ?", ["Victor Hugo","Antoine de Saint-Exupéry","Jules Verne","Molière"], 1),
+    Q("Qui a peint La Joconde ?", ["Picasso","Léonard de Vinci","Van Gogh","Monet"], 1),
+    Q("Quel est le plus grand océan du monde ?", ["L'Atlantique","L'océan Indien","Le Pacifique","L'Arctique"], 2),
+    Q("En quelle année a eu lieu la prise de la Bastille ?", ["1492","1789","1815","1914"], 1),
+    Q("Quel est l'animal le plus rapide sur terre ?", ["Le lion","Le guépard","Le cheval","Le lévrier"], 1),
+    Q("Vrai ou faux : on voit la Grande Muraille de Chine à l'œil nu depuis la Lune.", ["Vrai","Faux","",""], 1, 15)
+  ]},
+  {id:'paroles', name:'On connaît les paroles', emoji:'🎤', color:'#e5383b', qs:[],
+    hint:"Matière à remplir toi-même : écris un petit extrait de chanson avec un trou (ex. « … ___ … »), puis 4 propositions pour le mot manquant. Garde des extraits courts."},
+  {id:'final', name:'La grande finale', emoji:'🎓', color:'#ffc21a', final:true,
+    hint:"La finale : à chaque question, les élèves encore en classe qui répondent juste sortent. Le dernier qui reste est le plus nul.", qs:[
+    Q("Combien font 7 × 8 ?", ["54","56","58","64"], 1, 15),
+    Q("Combien de jours aura février en 2028 ?", ["28","29","30","31"], 1, 15),
+    Q("Quel est le pluriel de « cheval » ?", ["Des chevals","Des chevaux","Des chevales","Des chevaus"], 1, 15),
+    Q("Combien de minutes y a-t-il dans 2 heures ?", ["100","120","200","60"], 1, 15),
+    Q("Quelle est la capitale de l'Espagne ?", ["Barcelone","Madrid","Séville","Valence"], 1, 15),
+    Q("Bleu + jaune, ça donne…", ["Du vert","Du violet","De l'orange","Du marron"], 0, 15),
+    Q("Combien de lettres a l'alphabet ?", ["24","25","26","28"], 2, 15),
+    Q("Combien font 100 − 37 ?", ["63","73","67","53"], 0, 15),
+    Q("Quel est le contraire de « rapide » ?", ["Vite","Lent","Fort","Haut"], 1, 15),
+    Q("Qui a marché le premier sur la Lune ?", ["Neil Armstrong","Thomas Pesquet","Buzz l'Éclair","Youri Gagarine"], 0, 15),
+    Q("Quel est le féminin de « acteur » ?", ["Acteuse","Actrice","Acteure","Actrisse"], 1, 15),
+    Q("Quelle est la moitié de 50 ?", ["20","25","30","15"], 1, 15),
+    Q("Combien de faces a un dé classique ?", ["4","6","8","12"], 1, 15),
+    Q("Quel est le seul mammifère capable de vraiment voler ?", ["L'écureuil volant","La chauve-souris","Le pingouin","L'autruche"], 1, 15),
+    Q("Combien de côtés a un triangle ?", ["2","3","4","5"], 1, 15)
+  ]}
 ];
-const loadQ = () => { try { const v = JSON.parse(store.get('csahr-q-v2')); if (Array.isArray(v) && v.length) return v; } catch(e){} return JSON.parse(JSON.stringify(DEFAULT_Q)); };
-let Q = loadQ();
-const saveQ = () => store.set('csahr-q-v2', JSON.stringify(Q));
-const validQ = () => Q.filter(q => q.q.trim() && q.a.filter(x => x.trim()).length >= 2 && (q.a[q.c] || '').trim());
-const updateCount = () => { const n = validQ().length; $('#qcount').textContent = `${n} question${n > 1 ? 's' : ''} prête${n > 1 ? 's' : ''}`; };
+const KEY = 'csahr-plusnul-v1';
+const clone = o => JSON.parse(JSON.stringify(o));
+function loadThemes(){
+  const base = clone(DEFAULT_THEMES);
+  try { const saved = JSON.parse(store.get(KEY)); if (saved && typeof saved === 'object') base.forEach(t => { if (Array.isArray(saved[t.id])) t.qs = saved[t.id]; }); } catch(e){}
+  return base;
+}
+let THEMES = loadThemes();
+const saveThemes = () => { const o = {}; THEMES.forEach(t => o[t.id] = t.qs); store.set(KEY, JSON.stringify(o)); };
+const validQs = t => t.qs.filter(q => q.q.trim() && q.a.filter(x => x.trim()).length >= 2 && (q.a[q.c] || '').trim());
+const updateCount = () => { const n = THEMES.reduce((s, t) => s + validQs(t).length, 0); $('#qcount').textContent = `${n} questions prêtes dans ${THEMES.filter(t => validQs(t).length).length} matières`; };
 
+/* ---------- Éditeur ---------- */
+let eTab = 'sport';
+const curT = () => THEMES.find(t => t.id === eTab);
 function renderEditor(){
-  $('#qlist').innerHTML = Q.map((q, i) => `
+  $('#e-tabs').innerHTML = THEMES.map(t => `<button style="background:${t.color}" class="${t.id === eTab ? 'on' : ''}" data-tab="${t.id}">${t.emoji} ${esc(t.name)} (${validQs(t).length})</button>`).join('');
+  const t = curT();
+  $('#e-hint').textContent = t.hint || 'Coche la bonne réponse. Laisse une case vide pour 2 ou 3 réponses (ex. vrai/faux). Tout est enregistré sur cet ordinateur.';
+  $('#qlist').innerHTML = t.qs.map((q, i) => `
     <div class="qedit">
       <div class="head"><span>Question ${i + 1}</span>
         <span><select data-i="${i}" data-k="t" aria-label="Temps">${[10,15,20,30,45].map(s => `<option value="${s}" ${q.t == s ? 'selected' : ''}>${s} s</option>`).join('')}</select>
@@ -400,36 +517,35 @@ function renderEditor(){
       <div class="ans">${[0,1,2,3].map(j => `
         <label><span class="sw c${j}"></span><input type="radio" name="c${i}" data-i="${i}" data-c="${j}" ${q.c === j ? 'checked' : ''} aria-label="Bonne réponse ${j + 1}">
         <input data-i="${i}" data-a="${j}" value="${esc(q.a[j] || '')}" placeholder="Réponse ${j + 1}"></label>`).join('')}</div>
-    </div>`).join('');
+    </div>`).join('') || '<p class="hint">Aucune question pour l\'instant. Clique sur « Ajouter une question ».</p>';
 }
+$('#e-tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) { eTab = b.dataset.tab; renderEditor(); } });
 $('#qlist').addEventListener('input', e => {
-  const t = e.target, i = +t.dataset.i; if (isNaN(i)) return;
-  if (t.dataset.k === 'q') Q[i].q = t.value;
-  else if (t.dataset.k === 't') Q[i].t = +t.value;
-  else if (t.dataset.a !== undefined) Q[i].a[+t.dataset.a] = t.value;
-  else if (t.dataset.c !== undefined) Q[i].c = +t.dataset.c;
-  saveQ();
+  const t = e.target, i = +t.dataset.i, qs = curT().qs; if (isNaN(i) || !qs[i]) return;
+  if (t.dataset.k === 'q') qs[i].q = t.value;
+  else if (t.dataset.k === 't') qs[i].t = +t.value;
+  else if (t.dataset.a !== undefined) qs[i].a[+t.dataset.a] = t.value;
+  else if (t.dataset.c !== undefined) qs[i].c = +t.dataset.c;
+  saveThemes();
 });
-$('#qlist').addEventListener('change', e => { if (e.target.dataset.c !== undefined) { Q[+e.target.dataset.i].c = +e.target.dataset.c; saveQ(); } });
-$('#qlist').addEventListener('click', e => { const d = e.target.dataset.del; if (d !== undefined) { Q.splice(+d, 1); saveQ(); renderEditor(); } });
-$('#e-add').onclick = () => { Q.push({q:'', a:['','','',''], c:0, t:20}); saveQ(); renderEditor(); $('#qlist').lastElementChild.querySelector('textarea').focus(); };
-$('#e-reset').onclick = () => { Q = JSON.parse(JSON.stringify(DEFAULT_Q)); saveQ(); renderEditor(); };
-$('#e-done').onclick = () => { if (!validQ().length) { $('#e-err').textContent = 'Il faut au moins une question complète.'; return; } updateCount(); show('s-home'); };
+$('#qlist').addEventListener('change', e => { if (e.target.dataset.c !== undefined) { curT().qs[+e.target.dataset.i].c = +e.target.dataset.c; saveThemes(); } });
+$('#qlist').addEventListener('click', e => { const d = e.target.dataset.del; if (d !== undefined) { curT().qs.splice(+d, 1); saveThemes(); renderEditor(); } });
+$('#e-add').onclick = () => { curT().qs.push({q:'', a:['','','',''], c:0, t:20}); saveThemes(); renderEditor(); const l = $('#qlist').lastElementChild; if (l) l.querySelector('textarea').focus(); };
+$('#e-reset').onclick = () => { const d = DEFAULT_THEMES.find(t => t.id === eTab); curT().qs = clone(d.qs); saveThemes(); renderEditor(); };
+$('#e-done').onclick = () => { updateCount(); show('s-home'); };
 
-/* ---------- Réseau (PeerJS en ligne, ou BroadcastChannel pour tester sur un seul ordi) ---------- */
+/* ---------- Réseau (relais MQTT en ligne, ou BroadcastChannel pour tester sur un seul ordi) ---------- */
 function hostNet(code, local, h){
   if (local) {
     const ch = new BroadcastChannel('csahr-' + code);
-    ch.onmessage = e => { const d = e.data; if (d.to !== 'host') return;
-      if (d.m.t === '__close') h.close(d.from); else h.msg(d.from, d.m); };
+    ch.onmessage = e => { const d = e.data; if (d.to !== 'host') return; if (d.m.t === '__close') h.close(d.from); else h.msg(d.from, d.m); };
     setTimeout(h.ready, 50);
     return { send:(pid, m) => ch.postMessage({to:pid, m}), stop:() => ch.close() };
   }
-  if (typeof mqtt === 'undefined') { setTimeout(() => h.error('Internet est nécessaire pour lancer une partie.'), 0); return { send(){}, stop(){} }; }
+  if (typeof mqtt === 'undefined') { setTimeout(() => h.error('Internet est nécessaire pour ouvrir la classe.'), 0); return { send(){}, stop(){} }; }
   const base = TOPIC + code + '/';
   const cl = mqtt.connect(BROKER, {clientId:'csahr-h-' + rid(), clean:true, keepalive:20, connectTimeout:10000, reconnectPeriod:2000});
-  let first = true;
-  cl.on('connect', () => cl.subscribe(base + 'host', {qos:1}, err => { if (err) h.error('Connexion au serveur impossible.'); else { first = false; h.ready(); } }));
+  cl.on('connect', () => cl.subscribe(base + 'host', {qos:1}, err => { if (err) h.error('Connexion au serveur impossible.'); else h.ready(); }));
   cl.on('offline', () => h.error('Connexion internet perdue, reconnexion…'));
   cl.on('message', (t, buf) => { let d; try { d = JSON.parse(buf.toString()); } catch(e){ return; }
     if (!d || typeof d.from !== 'string' || !d.m) return;
@@ -438,7 +554,7 @@ function hostNet(code, local, h){
 }
 function playerNet(code, local, h){
   if (local) {
-    const pid = 'p' + Math.random().toString(36).slice(2);
+    const pid = 'p' + rid();
     const ch = new BroadcastChannel('csahr-' + code);
     ch.onmessage = e => { if (e.data.to === pid) h.msg(e.data.m); };
     addEventListener('beforeunload', () => ch.postMessage({to:'host', from:pid, m:{t:'__close'}}));
@@ -455,33 +571,35 @@ function playerNet(code, local, h){
   return { send:m => cl.publish(base + 'host', JSON.stringify({from:pid, m}), {qos:1}), stop:() => { try { cl.end(true); } catch(e){} } };
 }
 
-/* ---------- ANIMATEUR ---------- */
+/* ==================== ANIMATEUR ==================== */
 let H = null;
-const rank = () => [...H.players.values()].sort((a, b) => b.score - a.score);
 const active = () => [...H.players.values()].filter(p => p.on);
+const inClass = () => [...H.players.values()].filter(p => p.inClass);
+const participants = () => active().filter(p => p.inClass);
 const curQ = () => H.qs[H.qi];
+const isFinal = () => H.manche && H.manche.final;
+const playable = () => THEMES.filter(t => !t.final && validQs(t).length);
 
 function startHost(local){
-  const qs = validQ(); if (!qs.length) { renderEditor(); show('s-edit'); return; }
   const code = String(1000 + Math.floor(Math.random() * 9000));
-  H = {code, local, qs, players:new Map(), pid2key:new Map(), phase:'lobby', qi:-1, start:0, limit:0, tick:null, counts:[0,0,0,0], pin:rid(), admins:new Set()};
+  H = {code, local, players:new Map(), pid2key:new Map(), phase:'lobby', manche:null, qs:[], qi:-1, start:0, limit:0, tick:null,
+       counts:[0,0,0,0], pin:rid(), admins:new Set(), done:new Set(), exits:[], lastOut:[], losers:[]};
   show('s-lobby'); $('#b-fs').hidden = false;
   $('#l-code').textContent = code; $('#l-status').textContent = 'Connexion au serveur…';
-  $('#l-players').innerHTML = ''; $('#l-start').disabled = true; $('#l-title').textContent = 'En attente des judokas…';
+  $('#l-players').innerHTML = ''; $('#l-start').disabled = true; $('#l-title').textContent = 'La classe attend ses élèves…';
   const base = location.origin + location.pathname;
   const url = base + '?code=' + code + (local ? '&local=1' : '');
-  H.url = url;
   H.adminUrl = base + '?code=' + code + '&admin=' + H.pin + (local ? '&local=1' : '');
-  $('#aqr').innerHTML = '';
-  if (typeof QRCode !== 'undefined') new QRCode($('#aqr'), {text:H.adminUrl, width:260, height:260, correctLevel:QRCode.CorrectLevel.M});
-  $('#a-link').href = H.adminUrl;
   $('#l-url').textContent = (location.host + location.pathname).replace(/index\.html$/, '') || 'ce site';
-  $('#qr').innerHTML = '';
-  if (typeof QRCode !== 'undefined') new QRCode($('#qr'), {text:url, width:300, height:300, correctLevel:QRCode.CorrectLevel.M});
-  else $('#qr').innerHTML = '<span style="color:#121735;line-height:1.3">QR indisponible</span>';
+  $('#qr').innerHTML = ''; $('#aqr').innerHTML = '';
+  if (typeof QRCode !== 'undefined') {
+    new QRCode($('#qr'), {text:url, width:280, height:280, correctLevel:QRCode.CorrectLevel.M});
+    new QRCode($('#aqr'), {text:H.adminUrl, width:240, height:240, correctLevel:QRCode.CorrectLevel.M});
+  } else $('#qr').innerHTML = '<span style="color:#141a33;line-height:1.3">QR indisponible</span>';
+  $('#a-link').href = H.adminUrl;
   H.net = hostNet(code, local, {
-    ready: () => { if (local) $('#l-status').innerHTML = `Mode test : <a href="${esc(url)}" target="_blank" style="color:#fff">ouvre ce lien dans un nouvel onglet</a> pour chaque joueur.`; else $('#l-status').textContent = 'Scanne le QR code avec ton téléphone !'; },
-    error: m => { if (m === 'retry') { H.net.stop(); startHost(local); } else $('#l-status').textContent = m; },
+    ready: () => { if (local) $('#l-status').innerHTML = `Mode test : <a href="${esc(url)}" target="_blank" style="color:#fff">ouvre ce lien dans un nouvel onglet</a> pour chaque élève.`; else $('#l-status').textContent = 'Scanne le QR code avec ton téléphone !'; },
+    error: m => { $('#l-status').textContent = m; },
     msg: onHostMsg, close: onHostClose
   });
 }
@@ -489,87 +607,112 @@ function startHost(local){
 function onHostMsg(pid, m){
   if (!H || !m || typeof m !== 'object') return;
   if (m.t === 'join') {
-    let name = String(m.name || '').replace(/\s+/g, ' ').trim().slice(0, 16) || 'Judoka';
+    let name = String(m.name || '').replace(/\s+/g, ' ').trim().slice(0, 16) || 'Élève';
     let key = name.toLowerCase(), p = H.players.get(key);
     if (p && p.on && p.pid !== pid) { let n = 2; while (H.players.has((name + ' ' + n).toLowerCase())) n++; name += ' ' + n; key = name.toLowerCase(); p = null; }
-    if (!p) { p = {name, key, score:0, ans:{}}; H.players.set(key, p); }
+    if (!p) { p = {name, key, ans:{}, notes:{}, inClass:!isFinal() || H.phase === 'lobby', out:null}; H.players.set(key, p); }
     p.pid = pid; p.on = true; p.av = cleanAv(m.av); H.pid2key.set(pid, key);
-    H.net.send(pid, {t:'welcome', name:p.name, score:p.score, started:H.phase !== 'lobby'});
-    if (H.phase === 'question' && !p.ans[H.qi]) sendQ(pid);
-    renderLobby(); renderCount();
+    H.net.send(pid, {t:'welcome', name:p.name, started:H.phase !== 'lobby', inClass:p.inClass});
+    if (H.phase === 'question' && !p.ans[qkey()]) sendQ(p);
+    renderLobby(); renderCount(); renderClassBar();
   } else if (m.t === 'answer') {
     const p = H.players.get(H.pid2key.get(pid)); const q = curQ();
-    if (!p || H.phase !== 'question' || m.q !== H.qi || p.ans[H.qi]) return;
+    if (!p || H.phase !== 'question' || m.q !== H.qi || p.ans[qkey()]) return;
     const a = m.a | 0; if (!(q.a[a] || '').trim()) return;
     const el = Math.min(Date.now() - H.start, H.limit);
-    const ok = a === q.c, pts = ok ? Math.round(1000 * (1 - el / H.limit / 2)) : 0;
-    p.ans[H.qi] = {a, ok, pts}; p.score += pts; H.counts[a]++;
+    p.ans[qkey()] = {a, ok:a === q.c, el, counted:p.inClass};
+    if (p.inClass) H.counts[a]++;
     H.net.send(pid, {t:'ack'}); renderCount();
-    if (active().every(x => x.ans[H.qi])) reveal();
+    if (participants().length && participants().every(x => x.ans[qkey()])) reveal();
   } else if (m.t === 'admin') {
     if (m.pin !== H.pin) { H.net.send(pid, {t:'adeny'}); return; }
     H.admins.add(pid); pushAdmin();
   } else if (m.t === 'cmd' && H.admins.has(pid)) {
     if (m.c === 'next') hostNext();
     else if (m.c === 'skip' && H.phase === 'question') reveal();
-    else pushAdmin();
+    else if (m.c === 'theme' && H.phase === 'menu') startManche(String(m.id));
+    pushAdmin();
   }
-}
-const nextLabel = () => ({lobby:'Commencer', question:'Montrer la réponse', reveal:H.qi + 1 < H.qs.length ? 'Classement' : 'Voir le podium', board:'Question suivante', end:'Rejouer'})[H.phase];
-function pushAdmin(){
-  if (!H || !H.admins.size) return;
-  const q = H.qi >= 0 ? curQ() : null, act = active();
-  const st = {t:'astate', phase:H.phase, label:nextLabel(), players:act.length, qi:H.qi, n:H.qs.length,
-    q:q ? q.q : '', good:q ? q.a[q.c].trim() : '', answered:q ? act.filter(p => p.ans[H.qi]).length : 0,
-    canNext:H.phase !== 'lobby' || act.length > 0, top:rank().slice(0, 3).map(p => p.name + ' · ' + p.score)};
-  H.admins.forEach(a => H.net.send(a, st));
-}
-function hostNext(){
-  if (!H) return;
-  if (H.phase === 'lobby') { if (active().length) startQuestion(0); }
-  else if (H.phase === 'question') reveal();
-  else if (H.phase === 'reveal') H.qi + 1 < H.qs.length ? showBoard() : endGame();
-  else if (H.phase === 'board') startQuestion(H.qi + 1);
-  else if (H.phase === 'end') again();
-  pushAdmin();
 }
 function onHostClose(pid){
   if (!H) return; const key = H.pid2key.get(pid); const p = H.players.get(key); H.pid2key.delete(pid);
   if (!p || p.pid !== pid) return;
   if (H.phase === 'lobby') H.players.delete(key); else p.on = false;
-  renderLobby(); renderCount();
-  if (H.phase === 'question' && active().length && active().every(x => x.ans[H.qi])) reveal();
+  renderLobby(); renderCount(); renderClassBar();
+  if (H.phase === 'question' && participants().length && participants().every(x => x.ans[qkey()])) reveal();
 }
+const noteOf = (p, id) => (p.notes[id] = p.notes[id] || {ok:0, el:0});
+const qkey = () => (H.manche ? H.manche.id : '') + ':' + H.qi;
+
 function renderLobby(){
   if (H.phase !== 'lobby') return;
-  const ps = [...H.players.values()];
   H.seen = H.seen || new Set();
+  const ps = [...H.players.values()];
   $('#l-players').innerHTML = ps.map(p => `<span class="chip ${p.on ? '' : 'off'} ${H.seen.has(p.key) ? 'old' : ''}"><span class="av-s">${judoka(p.av)}</span>${esc(p.name)}</span>`).join('');
   ps.forEach(p => H.seen.add(p.key));
   const n = ps.filter(p => p.on).length;
-  $('#l-title').textContent = n ? `${n} judoka${n > 1 ? 's' : ''} sur le tatami` : 'En attente des judokas…';
-  $('#l-start').disabled = !n; $('#l-start').textContent = n ? `Commencer (${n})` : 'Commencer';
+  $('#l-title').textContent = n ? `${n} élève${n > 1 ? 's' : ''} en classe` : 'La classe attend ses élèves…';
+  $('#l-start').disabled = !n;
   pushAdmin();
+}
+function renderClassBar(){
+  if (!H || H.phase !== 'menu') return;
+  const c = inClass();
+  $('#m-sub').textContent = c.length ? `Encore ${c.length} élève${c.length > 1 ? 's' : ''} en classe` : 'Tout le monde est sorti !';
+  $('#m-class').innerHTML = c.map(p => `<span class="chip old ${p.on ? '' : 'off'}"><span class="av-s">${judoka(p.av)}</span>${esc(p.name)}</span>`).join('');
 }
 function renderCount(){
   if (!H || H.phase !== 'question') return;
-  const n = active().filter(p => p.ans[H.qi]).length, tot = active().length;
-  $('#q-count').textContent = `${n}/${tot} réponse${n > 1 ? 's' : ''}`;
+  const ps = participants(), n = ps.filter(p => p.ans[qkey()]).length;
+  $('#q-count').textContent = `${n}/${ps.length} en classe ont répondu`;
   pushAdmin();
 }
-function sendQ(pid){
-  const q = curQ();
-  H.net.send(pid, {t:'q', i:H.qi, n:H.qs.length, q:q.q, a:q.a.map(x => x.trim()), ms:Math.max(0, H.limit - (Date.now() - H.start))});
+
+function showMenu(){
+  H.phase = 'menu'; H.manche = null; clearInterval(H.tick);
+  const c = inClass().length;
+  $('#m-tiles').innerHTML = THEMES.map(t => {
+    const n = validQs(t).length, done = H.done.has(t.id);
+    const dis = !n || (t.final && c < 1);
+    return `<button class="tile-t ${t.final ? 'final' : ''} ${done ? 'done' : ''}" style="${t.final ? '' : 'background:' + t.color}" data-theme="${t.id}" ${dis ? 'disabled' : ''}>
+      ${done ? '<span class="stamp">Fait ✓</span>' : ''}<span class="em">${t.emoji}</span><b>${esc(t.name)}</b><span>${n ? n + ' questions' : 'À remplir'}</span></button>`;
+  }).join('');
+  show('s-menu'); renderClassBar();
+  H.players.forEach(p => p.on && H.net.send(p.pid, {t:'menu', inClass:p.inClass}));
+  pushAdmin();
+}
+$('#m-tiles').addEventListener('click', e => { const b = e.target.closest('[data-theme]'); if (b && !b.disabled) startManche(b.dataset.theme); });
+
+function startManche(id){
+  const t = THEMES.find(x => x.id === id); if (!t) return;
+  const qs = validQs(t); if (!qs.length) return;
+  if (t.final && !inClass().length) return;
+  H.manche = t; H.qs = qs; H.qi = -1; H.done.add(id); H.phase = 'intro';
+  H.players.forEach(p => { p.notes[t.id] = {ok:0, el:0}; });
+  $('#i-em').textContent = t.emoji; $('#i-name').textContent = t.final ? 'Qui sera le plus nul ?' : 'Contrôle de ' + t.name;
+  $('#i-name').style.color = t.color;
+  $('#i-rule').textContent = t.final
+    ? `Grande finale ! À chaque question, ceux qui répondent juste sortent de la classe. Le dernier qui reste sera sacré le plus nul !`
+    : `${qs.length} questions. À la fin du contrôle, les meilleures notes sortent de la classe. Les élèves déjà sortis peuvent jouer pour le fun.`;
+  show('s-intro');
+  H.players.forEach(p => p.on && H.net.send(p.pid, {t:'intro', name:t.final ? 'Grande finale' : t.name, emoji:t.emoji, color:t.color, final:!!t.final, inClass:p.inClass}));
+  pushAdmin();
+}
+function sendQ(p){
+  const q = curQ(), t = H.manche;
+  H.net.send(p.pid, {t:'q', i:H.qi, n:H.qs.length, q:q.q, a:q.a.map(x => x.trim()), ms:Math.max(0, H.limit - (Date.now() - H.start)),
+    theme:t.final ? 'Finale' : t.name, color:t.color, inClass:p.inClass});
 }
 function startQuestion(i){
   H.qi = i; H.phase = 'question'; H.counts = [0,0,0,0]; $('#admin-ov').hidden = true;
-  const q = curQ(); H.limit = (q.t || 20) * 1000; H.start = Date.now();
-  $('#q-num').textContent = `Question ${i + 1}/${H.qs.length}`;
+  const q = curQ(), t = H.manche; H.limit = (q.t || 20) * 1000; H.start = Date.now();
+  $('#q-tag').textContent = `${t.emoji} ${t.final ? 'Finale' : t.name} · ${i + 1}/${H.qs.length}`; $('#q-tag').style.background = t.color;
+  $('#q-tag').style.color = t.final ? '#2b1d00' : '#fff';
   $('#q-text').textContent = q.q;
   $('#q-tiles').innerHTML = q.a.map((a, j) => a.trim() ? `<div class="tile c${j}" data-j="${j}">${shape(j)}<span>${esc(a)}</span><span class="n" hidden>0</span></div>` : '').join('');
-  $('#q-skip').hidden = false; $('#q-next').hidden = true;
+  $('#q-exit').hidden = true; $('#q-skip').hidden = false; $('#q-next').hidden = true;
   show('s-q'); renderCount();
-  active().forEach(p => sendQ(p.pid));
+  active().forEach(sendQ);
   clearInterval(H.tick);
   const tick = () => { const left = Math.max(0, Math.ceil((H.limit - (Date.now() - H.start)) / 1000));
     $('#q-timer').textContent = left; $('#q-timer').classList.toggle('low', left <= 5); if (left <= 0) reveal(); };
@@ -578,75 +721,140 @@ function startQuestion(i){
 function reveal(){
   if (H.phase !== 'question') return;
   clearInterval(H.tick); H.phase = 'reveal';
-  const q = curQ();
-  document.querySelectorAll('#q-tiles .tile').forEach(t => { const j = +t.dataset.j;
-    t.classList.toggle('good', j === q.c); t.classList.toggle('dim', j !== q.c);
-    const n = t.querySelector('.n'); n.hidden = false; n.textContent = H.counts[j]; });
+  const q = curQ(), t = H.manche, k = qkey(), good = q.a[q.c].trim();
+  document.querySelectorAll('#q-tiles .tile').forEach(el => { const j = +el.dataset.j;
+    el.classList.toggle('good', j === q.c); el.classList.toggle('dim', j !== q.c);
+    const n = el.querySelector('.n'); n.hidden = false; n.textContent = H.counts[j]; });
+  // notes du contrôle
+  H.players.forEach(p => { const a = p.ans[k]; if (a && a.counted && a.ok) { noteOf(p, t.id).ok++; noteOf(p, t.id).el += a.el; } });
+  let exited = [];
+  if (t.final) {
+    const cls = inClass();
+    exited = cls.filter(p => p.ans[k] && p.ans[k].ok).sort((a, b) => a.ans[k].el - b.ans[k].el);
+    if (exited.length && exited.length === cls.length) exited.pop();   // le plus lent reste en classe
+    exited.forEach(p => graduate(p, 'Finale'));
+    const left = inClass();
+    $('#q-exit').hidden = false;
+    $('#q-exit').innerHTML = (exited.length
+      ? `🎓 Sortent : ${exited.map(p => `<span class="chip old"><span class="av-s">${judoka(p.av, 'grad')}</span>${esc(p.name)}</span>`).join('')}`
+      : 'Personne ne sort !') + `<span style="margin-left:12px">Encore en classe : ${left.length}</span>`;
+    $('#q-next').textContent = left.length <= 1 || H.qi + 1 >= H.qs.length ? 'Qui est le plus nul ?' : 'Question suivante';
+  } else {
+    $('#q-next').textContent = H.qi + 1 < H.qs.length ? 'Question suivante' : 'Voir le bulletin';
+  }
   $('#q-skip').hidden = true; $('#q-next').hidden = false;
-  $('#q-next').textContent = H.qi + 1 < H.qs.length ? 'Classement' : 'Voir le podium';
-  const r = rank();
-  r.forEach((p, k) => { if (!p.on) return; const a = p.ans[H.qi];
-    H.net.send(p.pid, {t:'res', ok:!!(a && a.ok), none:!a, pts:a ? a.pts : 0, score:p.score, rank:k + 1, n:r.length, good:q.a[q.c].trim()}); });
+  H.players.forEach(p => { if (!p.on) return; const a = p.ans[k];
+    H.net.send(p.pid, {t:'res', ok:!!(a && a.ok), none:!a, good, counted:!!(a && a.counted), final:!!t.final,
+      exited:exited.includes(p), inClass:p.inClass, note:t.final ? null : `${noteOf(p, t.id).ok}/${H.qi + 1}`}); });
   pushAdmin();
 }
-function showBoard(){
-  H.phase = 'board';
-  const r = rank().slice(0, 5), top = Math.max(1, r[0] ? r[0].score : 1);
-  $('#b-list').innerHTML = r.map((p, k) => `<div class="brow"><span class="rk">${k + 1}</span><span class="av-m">${judoka(p.av)}</span><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('') || '<p class="sub">Personne n\'a encore joué.</p>';
-  show('s-board'); pushAdmin();
+function graduate(p, where){ p.inClass = false; p.out = {rank:H.exits.length + 1, where}; H.exits.push(p.key); }
+
+function bulletin(){
+  H.phase = 'bulletin';
+  const t = H.manche, cls = inClass(), remaining = playable().filter(x => !H.done.has(x.id)).length;
+  const k = Math.max(0, Math.ceil((cls.length - 3) / (remaining + 1)));
+  const ranked = cls.slice().sort((a, b) => noteOf(b, t.id).ok - noteOf(a, t.id).ok || noteOf(a, t.id).el - noteOf(b, t.id).el);
+  const out = ranked.filter(p => noteOf(p, t.id).ok > 0).slice(0, k);
+  out.forEach(p => graduate(p, t.name));
+  const n = H.qs.length;
+  $('#bul').innerHTML = `<h2>Bulletin · ${t.emoji} ${esc(t.name)}</h2>
+    <p class="chalk" style="font-size:26px;margin:4px 0 10px;color:#1d3a32">${out.length ? `${out.length} meilleure${out.length > 1 ? 's' : ''} note${out.length > 1 ? 's' : ''} sort${out.length > 1 ? 'ent' : ''} de la classe !` : 'Personne ne sort de la classe cette fois…'}</p>
+    ${ranked.map(p => `<div class="brow"><span class="av-m">${judoka(p.av, out.includes(p) ? 'grad' : null)}</span><span class="nm">${esc(p.name)}</span>
+      <span class="note">${noteOf(p, t.id).ok}/${n}</span><span class="st ${out.includes(p) ? 'go' : ''}">${out.includes(p) ? 'Sort de la classe 🎓' : 'Reste en classe'}</span></div>`).join('') || '<p>Personne en classe.</p>'}`;
+  show('s-bul');
+  H.players.forEach(p => p.on && H.net.send(p.pid, {t:'bulletin', name:t.name, note:p.notes[t.id] ? `${p.notes[t.id].ok}/${n}` : '', exited:out.includes(p), inClass:p.inClass, wasOut:!out.includes(p) && !p.inClass}));
+  pushAdmin();
 }
-function endGame(){
+function finale(){
   H.phase = 'end'; clearInterval(H.tick);
-  const r = rank();
-  const order = [1, 0, 2];
-  $('#podium').innerHTML = order.map(k => r[k] ? `<div class="step p${k + 1}"><span class="av-p">${judoka(r[k].av)}</span><b>${esc(r[k].name)}</b><span class="pill">${r[k].score} pts</span><div class="block">${k + 1}</div></div>` : '<div class="step"></div>').join('');
-  $('#end-rest').innerHTML = r.slice(3, 10).map((p, k) => `<div class="brow"><span class="rk">${k + 4}</span><span class="av-m">${judoka(p.av)}</span><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('');
+  const losers = inClass(); H.losers = losers;
+  $('#e-pre').textContent = losers.length > 1 ? 'Et les plus nuls sont…' : 'Et le plus nul est…';
+  $('#e-losers').innerHTML = losers.map(p => `<div class="loser"><span class="av-x" style="margin-top:70px">${judoka(p.av, 'dunce')}</span><b>${esc(p.name)}</b><span class="trophy">🏆</span></div>`).join('') || '<p class="sub">Personne ! Toute la classe est diplômée.</p>';
+  $('#e-sub').textContent = losers.length ? 'Bravo pour ce magnifique titre que personne ne voulait !' : '';
+  const dip = H.exits.map(k => H.players.get(k)).filter(Boolean);
+  $('#e-dipl').innerHTML = dip.map(p => `<span class="dchip"><span class="rk">${p.out.rank}</span><span class="av-m">${judoka(p.av, 'grad')}</span>${esc(p.name)}${p.out.rank === 1 ? ' · Premier de la classe' : ''}</span>`).join('');
   show('s-end');
-  r.forEach((p, k) => p.on && H.net.send(p.pid, {t:'end', rank:k + 1, n:r.length, score:p.score}));
+  H.players.forEach(p => p.on && H.net.send(p.pid, {t:'end', nul:losers.includes(p), rank:p.out ? p.out.rank : null, where:p.out ? p.out.where : null, n:dip.length}));
   pushAdmin();
 }
 function again(){
-  for (const [k, p] of H.players) { if (!p.on) H.players.delete(k); else { p.score = 0; p.ans = {}; } }
-  H.phase = 'lobby'; H.qi = -1; H.qs = validQ();
-  active().forEach(p => H.net.send(p.pid, {t:'lobby'}));
+  H.done = new Set(); H.exits = []; H.manche = null; H.qi = -1; H.phase = 'lobby';
+  for (const [k, p] of H.players) { if (!p.on) H.players.delete(k); else { p.ans = {}; p.notes = {}; p.inClass = true; p.out = null; } }
+  H.players.forEach(p => H.net.send(p.pid, {t:'lobby'}));
   show('s-lobby'); renderLobby();
+}
+function hostNext(){
+  if (!H) return;
+  const ph = H.phase;
+  if (ph === 'lobby') { if (active().length) showMenu(); }
+  else if (ph === 'intro') startQuestion(0);
+  else if (ph === 'question') reveal();
+  else if (ph === 'reveal') {
+    if (isFinal()) (inClass().length <= 1 || H.qi + 1 >= H.qs.length) ? finale() : startQuestion(H.qi + 1);
+    else H.qi + 1 < H.qs.length ? startQuestion(H.qi + 1) : bulletin();
+  }
+  else if (ph === 'bulletin') showMenu();
+  else if (ph === 'end') again();
+  pushAdmin();
+}
+const nextLabel = () => {
+  const ph = H.phase;
+  if (ph === 'lobby') return 'Sonner la rentrée';
+  if (ph === 'menu') return '';
+  if (ph === 'intro') return "C'est parti !";
+  if (ph === 'question') return 'Montrer la réponse';
+  if (ph === 'reveal') return $('#q-next').textContent;
+  if (ph === 'bulletin') return "Retour à l'emploi du temps";
+  if (ph === 'end') return 'Nouvelle rentrée';
+  return 'Suivant';
+};
+function pushAdmin(){
+  if (!H || !H.admins.size) return;
+  const q = H.phase === 'question' || H.phase === 'reveal' ? curQ() : null, ps = participants();
+  const st = {t:'astate', phase:H.phase, label:nextLabel(), players:active().length, inClass:inClass().length,
+    title:H.manche ? (H.manche.final ? 'Grande finale' : H.manche.name) : '', qi:H.qi, n:H.qs.length,
+    q:q ? q.q : '', good:q ? q.a[q.c].trim() : '', answered:q ? ps.filter(p => p.ans[qkey()]).length : 0, part:ps.length,
+    canNext:H.phase !== 'lobby' || active().length > 0,
+    themes:THEMES.map(t => ({id:t.id, name:t.final ? 'Finale' : t.name, emoji:t.emoji, color:t.color, n:validQs(t).length, done:H.done.has(t.id), final:!!t.final}))};
+  H.admins.forEach(a => H.net.send(a, st));
 }
 $('#b-host').onclick = () => startHost(false);
 $('#b-local').onclick = () => startHost(true);
 $('#b-edit').onclick = () => { renderEditor(); show('s-edit'); };
-$('#b-iamplayer').onclick = () => playerJoin(params.get('local') === '1' || !!(H && H.local));
+$('#b-iamplayer').onclick = () => playerJoin(params.get('local') === '1');
 $('#l-start').onclick = hostNext;
 $('#l-quit').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
+$('#i-go').onclick = hostNext;
 $('#q-skip').onclick = hostNext;
 $('#q-next').onclick = hostNext;
-$('#b-next').onclick = hostNext;
+$('#bul-next').onclick = hostNext;
 $('#end-again').onclick = hostNext;
+$('#end-home').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
 $('#l-admin').onclick = () => { $('#admin-ov').hidden = false; };
 $('#a-close').onclick = () => { $('#admin-ov').hidden = true; };
-$('#end-home').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
 $('#b-fs').onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch(e){} };
 
-/* ---------- JOUEUR ---------- */
+/* ==================== ÉLÈVE ==================== */
 let P = null;
 function playerJoin(local){
   P = {local};
   $('#p-code').value = params.get('code') || '';
   $('#p-name').value = sstore.get('csahr-name') || '';
   $('#p-err').textContent = '';
-  try { P.av = cleanAv(JSON.parse(store.get('csahr-av'))); if (!store.get('csahr-av')) P.av = randAv(); } catch(e){ P.av = randAv(); }
+  try { const s = store.get('csahr-av'); P.av = s ? cleanAv(JSON.parse(s)) : randAv(); } catch(e){ P.av = randAv(); }
   renderMaker();
   show('p-join');
-  ($('#p-code').value ? $('#p-name') : $('#p-code')).focus();
 }
 function connectPlayer(){
   if (P.net) P.net.stop();
   P.answered = -1;
   clearTimeout(P.timer);
-  P.timer = setTimeout(() => { if (P.joined) return; $('#p-err').textContent = 'Aucune partie trouvée avec ce code. Vérifie le code et que la partie est bien lancée sur le grand écran.'; $('#p-go').disabled = false; show('p-join'); }, 12000);
+  P.timer = setTimeout(() => { if (P.joined) return; $('#p-err').textContent = 'Aucune classe trouvée avec ce code. Vérifie le code et que la classe est ouverte sur le grand écran.'; $('#p-go').disabled = false; show('p-join'); }, 12000);
   P.net = playerNet(P.code, P.local, {
     open: () => P.net.send({t:'join', name:P.name, av:P.av}),
     msg: onPlayerMsg,
-    close: () => { $('#lost-msg').textContent = 'Pas de panique, tes points sont gardés.'; show('p-lost'); },
+    close: () => show('p-lost'),
     error: m => { if (P.joined) { $('#lost-msg').textContent = m; show('p-lost'); } else { $('#p-err').textContent = m; $('#p-go').disabled = false; show('p-join'); } }
   });
 }
@@ -655,7 +863,7 @@ $('#p-form').addEventListener('submit', e => {
   const code = $('#p-code').value.replace(/\D/g, ''), name = $('#p-name').value.trim();
   if (code.length !== 4) { $('#p-err').textContent = 'Le code a 4 chiffres.'; return; }
   if (!name) { $('#p-err').textContent = 'Écris ton prénom.'; return; }
-  P.code = code; P.name = name; sstore.set('csahr-name', name);
+  P.code = code; P.name = name; sstore.set('csahr-name', name); store.set('csahr-av', JSON.stringify(P.av));
   $('#p-err').textContent = 'Connexion…'; $('#p-go').disabled = true;
   connectPlayer();
 });
@@ -676,19 +884,29 @@ function renderMaker(){
 $('#mk-opts').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
   P.av[b.dataset.k] = +b.dataset.v; store.set('csahr-av', JSON.stringify(P.av)); renderMaker(); });
 $('#mk-rand').onclick = () => { P.av = randAv(); store.set('csahr-av', JSON.stringify(P.av)); renderMaker(); };
+function waitScreen(title, sub, inCls){
+  if (inCls !== undefined) P.inClass = inCls;
+  $('#w-av').innerHTML = judoka(P.av, P.inClass ? null : 'grad');
+  $('#w-av').classList.toggle('hat', !P.inClass);
+  $('#w-status').textContent = P.inClass ? 'En classe' : 'Diplômé·e 🎓 (tu joues pour le fun)';
+  $('#w-title').textContent = title; $('#w-sub').textContent = sub;
+  show('p-wait');
+}
 let barRaf = 0;
 function onPlayerMsg(m){
   if (!m || typeof m !== 'object') return;
   if (m.t === 'welcome') {
-    P.joined = true; P.name = m.name; $('#p-go').disabled = false;
-    $('#w-title').textContent = `C'est bon ${m.name} !`;
-    $('#w-av').innerHTML = judoka(P.av); $('#pe-av').innerHTML = judoka(P.av);
-    $('#w-sub').textContent = m.started ? 'Tu es dans la partie, la prochaine question arrive…' : 'Regarde le grand écran, ça va commencer…';
-    $('#w-score').hidden = !m.score; $('#w-score').textContent = m.score + ' pts';
-    show('p-wait');
+    P.joined = true; P.name = m.name; $('#p-go').disabled = false; clearTimeout(P.timer);
+    waitScreen(`Bienvenue ${m.name} !`, m.started ? 'Tu es en classe, la suite arrive…' : 'Regarde le grand écran, la rentrée va sonner…', m.inClass);
+  } else if (m.t === 'menu') {
+    waitScreen(P.inClass ? 'Récré !' : 'Tu es sorti·e !', "L'animateur choisit la prochaine matière…", m.inClass);
+  } else if (m.t === 'intro') {
+    P.inClass = m.inClass;
+    waitScreen(`${m.emoji} ${m.name}`, m.final ? (m.inClass ? 'Réponds juste pour sortir… sinon tu seras peut-être le plus nul !' : 'Tu es diplômé·e : regarde qui sera le plus nul !') : 'Le contrôle va commencer. Concentre-toi !');
   } else if (m.t === 'q') {
-    P.answered = -1; P.qi = m.i;
-    $('#pq-num').textContent = `Question ${m.i + 1}/${m.n}`; $('#pq-name').textContent = P.name;
+    P.answered = -1; P.qi = m.i; P.inClass = m.inClass;
+    $('#pq-tag').textContent = `${m.theme} · ${m.i + 1}/${m.n}`; $('#pq-tag').style.background = m.color;
+    $('#pq-status').textContent = m.inClass ? `${P.name} · en classe` : `${P.name} · pour le fun 🎓`;
     $('#pq-text').textContent = m.q;
     const n = m.a.filter(Boolean).length;
     $('#pq-btns').className = 'pbtns' + (n <= 2 ? ' two' : '');
@@ -701,20 +919,28 @@ function onPlayerMsg(m){
   } else if (m.t === 'ack') {
     show('p-sent');
   } else if (m.t === 'res') {
-    cancelAnimationFrame(barRaf);
-    const s = $('#p-res'); s.classList.toggle('res-ok', m.ok); s.classList.toggle('res-ko', !m.ok);
-    $('#r-verdict').textContent = m.ok ? (m.pts >= 800 ? 'Ippon !' : 'Waza-ari !') : (m.none ? 'Trop tard !' : 'Raté…');
-    $('#r-sub').textContent = m.ok ? 'Bonne réponse, bravo !' : 'La bonne réponse : ' + m.good;
-    $('#r-pts').textContent = (m.ok ? '+' + m.pts : '+0') + ' · ' + m.score + ' pts';
-    $('#r-rank').textContent = `Tu es ${m.rank === 1 ? '1er' : m.rank + 'e'} sur ${m.n}`;
+    cancelAnimationFrame(barRaf); P.inClass = m.inClass;
+    const s = $('#p-res'); s.classList.remove('res-ok', 'res-ko', 'res-pub');
+    if (m.final && m.exited) { s.classList.add('res-ok'); $('#r-verdict').textContent = 'Tu sors !'; $('#r-sub').textContent = 'Bonne réponse : tu échappes au titre de plus nul 🎓'; $('#r-pill').textContent = 'Diplômé·e'; }
+    else {
+      s.classList.add(!m.counted && !m.none ? 'res-pub' : m.ok ? 'res-ok' : 'res-ko');
+      $('#r-verdict').textContent = m.ok ? 'Bonne réponse !' : m.none ? 'Trop tard !' : 'Raté…';
+      $('#r-sub').textContent = m.ok ? (m.final && m.inClass ? 'Mais tu étais le plus lent… tu restes en classe !' : 'Bravo !') : 'La bonne réponse : ' + m.good;
+      $('#r-pill').textContent = m.inClass ? (m.note ? 'Note : ' + m.note : 'Toujours en classe…') : 'Diplômé·e · pour le fun';
+    }
     show('p-res');
+  } else if (m.t === 'bulletin') {
+    P.inClass = m.inClass;
+    if (m.exited) waitScreen('Tu sors de la classe !', `Super note en ${m.name} : ${m.note}. Tu es diplômé·e 🎓`);
+    else if (m.wasOut) waitScreen('Bulletin', `Ta note pour le fun : ${m.note}`);
+    else waitScreen('Tu restes en classe…', `Ta note en ${m.name} : ${m.note}. Il faudra faire mieux !`);
   } else if (m.t === 'end') {
-    $('#pe-title').textContent = m.rank === 1 ? 'Champion du dojo !' : m.rank <= 3 ? `Sur le podium : ${m.rank}e !` : `Tu finis ${m.rank}e sur ${m.n}`;
-    $('#pe-score').textContent = m.score + ' pts';
+    $('#pe-av').innerHTML = judoka(P.av, m.nul ? 'dunce' : 'grad');
+    $('#pe-title').textContent = m.nul ? 'Tu es LE PLUS NUL ! 🏆' : m.rank === 1 ? 'Premier de la classe !' : `Diplômé·e : ${m.rank}e sorti·e`;
+    $('#pe-sub').textContent = m.nul ? 'Un titre que personne ne voulait… félicitations !' : `Tu es sorti·e en ${m.where}. Bravo !`;
     show('p-end');
   } else if (m.t === 'lobby') {
-    $('#w-title').textContent = 'Nouvelle partie !'; $('#w-sub').textContent = 'Regarde le grand écran, ça va recommencer…'; $('#w-score').hidden = true;
-    show('p-wait');
+    waitScreen('Nouvelle rentrée !', 'Regarde le grand écran, ça va recommencer…', true);
   }
 }
 $('#pq-btns').addEventListener('click', e => {
@@ -724,14 +950,14 @@ $('#pq-btns').addEventListener('click', e => {
   P.net.send({t:'answer', q:P.qi, a:+b.dataset.j});
 });
 
-/* ---------- TÉLÉCOMMANDE ANIMATEUR ---------- */
+/* ==================== TÉLÉCOMMANDE ==================== */
 let A = null;
 function adminJoin(){
   const code = (params.get('code') || '').replace(/\D/g, ''), pin = params.get('admin');
   A = {ok:false};
   show('a-panel');
   const fail = msg => { $('#a-title').textContent = 'Pas connecté'; $('#a-err').textContent = msg; };
-  const t = setTimeout(() => { if (!A.ok) fail('Partie introuvable. Rescanne le QR « Télécommande » sur le grand écran.'); }, 12000);
+  const t = setTimeout(() => { if (!A.ok) fail('Classe introuvable. Rescanne le QR « Télécommande » sur le grand écran.'); }, 12000);
   A.net = playerNet(code, params.get('local') === '1', {
     open: () => A.net.send({t:'admin', pin}),
     error: fail,
@@ -740,20 +966,23 @@ function adminJoin(){
       if (m.t === 'adeny') { clearTimeout(t); fail('Lien de télécommande invalide.'); return; }
       if (m.t !== 'astate') return;
       A.ok = true; clearTimeout(t); $('#a-err').textContent = '';
-      $('#a-title').textContent = {lobby:'Salle d\'attente', question:'Question en cours', reveal:'Réponse affichée', board:'Classement', end:'Podium'}[m.phase] || '';
+      $('#a-title').textContent = {lobby:'Salle de classe', menu:'Emploi du temps', intro:m.title, question:m.title, reveal:m.title, bulletin:'Bulletin', end:'Remise des diplômes'}[m.phase] || '';
       $('#a-card').hidden = false;
-      $('#a-step').textContent = m.qi >= 0 ? `Question ${m.qi + 1}/${m.n}` : `${m.n} questions prêtes`;
+      $('#a-step').textContent = m.qi >= 0 && (m.phase === 'question' || m.phase === 'reveal') ? `Question ${m.qi + 1}/${m.n}` : '';
       $('#a-q').textContent = m.q;
       $('#a-good').textContent = m.good ? '✓ ' + m.good : '';
-      $('#a-info').textContent = m.phase === 'question' ? `${m.answered}/${m.players} ont répondu` : `${m.players} joueur${m.players > 1 ? 's' : ''} connecté${m.players > 1 ? 's' : ''}`;
-      $('#a-top').textContent = m.top.length ? 'Top : ' + m.top.join('  ·  ') : '';
-      $('#a-next').textContent = m.label; $('#a-next').disabled = !m.canNext;
+      $('#a-info').textContent = m.phase === 'question' ? `${m.answered}/${m.part} en classe ont répondu` : `${m.players} élève${m.players > 1 ? 's' : ''} connecté${m.players > 1 ? 's' : ''} · ${m.inClass} encore en classe`;
+      const menu = m.phase === 'menu';
+      $('#a-themes').hidden = !menu;
+      if (menu) $('#a-themes').innerHTML = m.themes.map(t => `<button class="tile-t ${t.final ? 'final' : ''} ${t.done ? 'done' : ''}" style="${t.final ? '' : 'background:' + t.color}" data-theme="${t.id}" ${!t.n || (t.final && !m.inClass) ? 'disabled' : ''}><span class="em">${t.emoji}</span><b>${esc(t.name)}</b></button>`).join('');
+      $('#a-next').hidden = menu; $('#a-next').textContent = m.label; $('#a-next').disabled = !m.canNext;
       $('#a-skip').hidden = m.phase !== 'question';
     }
   });
 }
 $('#a-next').onclick = () => { if (A && A.ok) { A.net.send({t:'cmd', c:'next'}); $('#a-next').disabled = true; } };
 $('#a-skip').onclick = () => { if (A && A.ok) A.net.send({t:'cmd', c:'skip'}); };
+$('#a-themes').addEventListener('click', e => { const b = e.target.closest('[data-theme]'); if (b && !b.disabled && A && A.ok) A.net.send({t:'cmd', c:'theme', id:b.dataset.theme}); });
 
 /* ---------- Démarrage ---------- */
 updateCount();
