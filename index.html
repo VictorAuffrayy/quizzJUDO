@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Quiz du Dojo – Judo CSAHR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: un jeu télé de dojo, joyeux, gros boutons pour enfants
+   IDEA: le tatami — fond bleu judogi quadrillé comme des tatamis, cartes blanches comme le judogi
+   PICTURE: l'emblème CSAHR (cercle rouge + ceinture noire nouée)
+   COLOUR/TYPE: bleu judogi, blanc, rouge ; réponses rouge/jaune/vert/bleu ciel ; Anton + Nunito
+   LAYOUT: un écran par étape, tout centré, 2x2 boutons plein écran sur téléphone */
+:root{--blue:#1a3fb0;--blue-d:#0e2572;--ink:#121735;--white:#fff;--red:#e5383b;--yellow:#f4b30c;--green:#14a05b;--sky:#2390e8;--muted:#5b6386}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;color:var(--white);font:17px/1.45 Nunito,system-ui,sans-serif;background-color:var(--blue);
+background-image:linear-gradient(rgba(255,255,255,.07) 2px,transparent 2px),linear-gradient(90deg,rgba(255,255,255,.07) 2px,transparent 2px);
+background-size:180px 90px;overflow-x:clip}
+h1,h2,.big{font-family:Anton,Impact,sans-serif;font-weight:400;letter-spacing:.5px;line-height:1.05;margin:0}
+h1{font-size:clamp(40px,7vw,76px)}h2{font-size:clamp(28px,4.5vw,48px)}
+.screen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px max(4vw,16px);text-align:center}
+.screen[hidden]{display:none}
+.card{background:var(--white);color:var(--ink);border-radius:22px;padding:22px;box-shadow:0 10px 0 rgba(0,0,0,.18);width:min(100%,560px)}
+.btn{font:800 18px Nunito,sans-serif;border:0;border-radius:14px;padding:14px 26px;min-height:52px;cursor:pointer;background:var(--red);color:#fff;box-shadow:0 5px 0 #a11d20;transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #a11d20}
+.btn.alt{background:#fff;color:var(--blue-d);box-shadow:0 5px 0 #b9c3e6}
+.btn.ghost{background:transparent;color:#fff;box-shadow:none;text-decoration:underline;font-weight:700;min-height:44px;padding:8px 14px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center}
+.logo{width:clamp(120px,22vw,190px);height:auto;filter:drop-shadow(0 8px 0 rgba(0,0,0,.2))}
+.sub{font-weight:800;font-size:clamp(17px,2.2vw,22px);opacity:.9;margin:0}
+input,select,textarea{font:700 18px Nunito,sans-serif;border:3px solid #d6dbef;border-radius:12px;padding:12px 14px;width:100%;color:var(--ink);background:#fff}
+input.code{font-family:Anton,sans-serif;font-size:34px;text-align:center;letter-spacing:6px}
+label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
+.err{color:var(--red);font-weight:800;min-height:1.4em;margin:8px 0 0}
+.small{font-size:14px;opacity:.85}
+/* lobby */
+.lobby{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:24px;width:min(100%,1180px);align-items:start}
+.join-box{display:flex;flex-direction:column;align-items:center;gap:12px}
+#qr{background:#fff;padding:14px;border-radius:16px;line-height:0}
+#qr img,#qr canvas{width:min(300px,60vw)!important;height:auto!important}
+.codebig{font-family:Anton,sans-serif;font-size:clamp(56px,9vw,104px);color:var(--ink);letter-spacing:8px;line-height:1}
+.url{font-weight:800;color:var(--blue);word-break:break-all;font-size:16px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-content:flex-start;min-height:120px}
+.chip{background:#fff;color:var(--ink);border-radius:999px;padding:8px 16px 8px 8px;font-weight:900;display:flex;align-items:center;gap:8px;animation:pop .35s ease-out}
+.chip i{width:26px;height:26px;border-radius:50%;display:inline-block;border:3px solid rgba(0,0,0,.15)}
+.chip.off{opacity:.45}.chip.old{animation:none}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+/* question host */
+.qtop{display:flex;justify-content:space-between;align-items:center;width:min(100%,1180px);font-weight:900;font-size:20px}
+.timer{width:92px;height:92px;border-radius:50%;background:#fff;color:var(--ink);display:grid;place-items:center;font-family:Anton,sans-serif;font-size:44px;box-shadow:0 6px 0 rgba(0,0,0,.2)}
+.timer.low{background:var(--red);color:#fff}
+.qtext{background:#fff;color:var(--ink);border-radius:22px;padding:28px;width:min(100%,1180px);font-weight:900;font-size:clamp(26px,3.6vw,46px);line-height:1.15;box-shadow:0 10px 0 rgba(0,0,0,.18);text-wrap:balance}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;width:min(100%,1180px)}
+.tile{position:relative;display:flex;align-items:center;gap:16px;padding:20px 22px;border-radius:18px;font-weight:900;font-size:clamp(20px,2.6vw,32px);color:#fff;text-align:left;min-height:96px;box-shadow:0 7px 0 rgba(0,0,0,.25);transition:opacity .3s,transform .3s}
+.tile svg{flex:none;width:46px;height:46px}
+.tile .n{margin-left:auto;font-family:Anton,sans-serif;font-size:34px;background:rgba(0,0,0,.2);border-radius:12px;padding:2px 14px}
+.tile.dim{opacity:.3}.tile.good{transform:scale(1.03);outline:6px solid #fff}
+.c0{background:var(--red)}.c1{background:var(--yellow);color:#2b1d00}.c2{background:var(--green)}.c3{background:var(--sky)}
+.c1 .n{background:rgba(0,0,0,.12)}
+/* board */
+.board{width:min(100%,760px);display:flex;flex-direction:column;gap:12px}
+.brow{display:flex;align-items:center;gap:14px;background:#fff;color:var(--ink);border-radius:16px;padding:12px 18px;font-weight:900;font-size:22px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.brow .rk{font-family:Anton,sans-serif;font-size:30px;width:44px;color:var(--blue)}
+.brow .sc{margin-left:auto;font-family:Anton,sans-serif;font-size:28px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:clamp(8px,2vw,22px);width:min(100%,820px)}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px}
+.step b{font-size:clamp(18px,2.4vw,28px);font-weight:900;word-break:break-word}
+.block{width:100%;border-radius:16px 16px 0 0;display:grid;place-items:center;font-family:Anton,sans-serif;font-size:clamp(40px,6vw,72px);color:#fff;box-shadow:inset 0 -10px 0 rgba(0,0,0,.18)}
+.p1 .block{height:240px;background:var(--yellow);color:#2b1d00}.p2 .block{height:170px;background:#c9cfe6;color:var(--ink)}.p3 .block{height:120px;background:#d58a4a}
+.belt{width:clamp(70px,9vw,110px);height:auto}
+/* editor */
+.editor{width:min(100%,900px);display:flex;flex-direction:column;gap:16px;text-align:left}
+.qedit{background:#fff;color:var(--ink);border-radius:18px;padding:18px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.qedit .head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:900}
+.qedit textarea{min-height:64px;resize:vertical}
+.ans{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:10px}
+.ans label{display:flex;align-items:center;gap:8px;margin:0;font-weight:700}
+.ans input[type=radio]{width:24px;height:24px;flex:none;accent-color:var(--green)}
+.ans .sw{width:16px;align-self:stretch;border-radius:6px;flex:none}
+.x{background:none;border:0;color:var(--red);font:800 15px Nunito;cursor:pointer;min-height:44px;padding:0 8px}
+.sticky{position:sticky;bottom:0;padding:14px;background:var(--blue-d);border-radius:18px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:min(100%,900px)}
+/* player */
+.pq{padding:12px;gap:12px;justify-content:flex-start}
+.pq .qmini{background:#fff;color:var(--ink);border-radius:16px;padding:14px;font-weight:900;font-size:19px;width:100%;line-height:1.2}
+.bar{width:100%;height:10px;background:rgba(255,255,255,.25);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--yellow);width:100%}
+.pbtns{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%}
+.pbtns.two{grid-template-columns:minmax(0,1fr)}
+.pbtn{border:0;border-radius:20px;color:#fff;font:900 clamp(18px,5vw,26px) Nunito,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;box-shadow:0 7px 0 rgba(0,0,0,.25);cursor:pointer;min-height:120px}
+.pbtn svg{width:clamp(46px,14vw,74px);height:auto}
+.pbtn:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.verdict{font-family:Anton,sans-serif;font-size:clamp(56px,16vw,110px);line-height:1}
+.res-ok{background:var(--green)}.res-ko{background:var(--red)}
+.pill{background:rgba(0,0,0,.22);border-radius:999px;padding:8px 20px;font-weight:900;font-size:22px}
+.spin{width:64px;height:64px;border-radius:50%;border:7px solid rgba(255,255,255,.3);border-top-color:#fff;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.fs{position:fixed;top:12px;right:12px;z-index:5}
+@media(max-width:800px){.lobby{grid-template-columns:minmax(0,1fr)}.tiles{grid-template-columns:minmax(0,1fr)}.tile{min-height:70px}.p1 .block{height:170px}.p2 .block{height:120px}.p3 .block{height:90px}}
+@media(max-width:600px){.ans{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ============ ANIMATEUR ============ -->
+<section class="screen" id="s-home">
+  <svg class="logo" viewBox="0 0 200 200" aria-label="Emblème Judo CSAHR"><use href="#emblem"/></svg>
+  <h1>Le Quiz du Dojo</h1>
+  <p class="sub">Judo CSAHR · scanne, réponds, marque l'ippon !</p>
+  <div class="row">
+    <button class="btn" id="b-host">Lancer une partie</button>
+    <button class="btn alt" id="b-edit">Modifier les questions</button>
+  </div>
+  <div class="row">
+    <button class="btn ghost" id="b-iamplayer">Je suis joueur</button>
+    <button class="btn ghost" id="b-local">Tester sur cet ordi</button>
+  </div>
+  <p class="small" id="qcount"></p>
+</section>
+
+<section class="screen" id="s-edit" hidden style="justify-content:flex-start">
+  <h2>Les questions</h2>
+  <p class="sub small">Coche la bonne réponse. Laisse une case vide pour avoir 2 ou 3 réponses (ex. vrai/faux). Tout est enregistré sur cet ordinateur.</p>
+  <div class="editor" id="qlist"></div>
+  <div class="sticky">
+    <button class="btn alt" id="e-add">+ Ajouter une question</button>
+    <button class="btn ghost" id="e-reset">Remettre les questions judo</button>
+    <button class="btn" id="e-done">Terminé</button>
+  </div>
+  <p class="err" id="e-err"></p>
+</section>
+
+<section class="screen" id="s-lobby" hidden>
+  <div class="lobby">
+    <div class="card join-box">
+      <strong style="font-size:20px">Scanne pour jouer</strong>
+      <div id="qr"></div>
+      <span class="small">ou va sur <span class="url" id="l-url"></span></span>
+      <span>Code de la partie</span>
+      <div class="codebig" id="l-code">····</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;align-items:center">
+      <h2 id="l-title">En attente des judokas…</h2>
+      <p class="sub" id="l-status">Connexion au serveur…</p>
+      <div class="chips" id="l-players"></div>
+      <div class="row">
+        <button class="btn" id="l-start" disabled>Commencer</button>
+        <button class="btn ghost" id="l-quit">Retour</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="s-q" hidden>
+  <div class="qtop"><span id="q-num">Question 1/10</span><div class="timer" id="q-timer">20</div><span id="q-count">0 réponse</span></div>
+  <div class="qtext" id="q-text"></div>
+  <div class="tiles" id="q-tiles"></div>
+  <div class="row"><button class="btn alt" id="q-skip">Arrêter le chrono</button><button class="btn" id="q-next" hidden>Classement</button></div>
+</section>
+
+<section class="screen" id="s-board" hidden>
+  <h2>Classement</h2>
+  <div class="board" id="b-list"></div>
+  <button class="btn" id="b-next">Question suivante</button>
+</section>
+
+<section class="screen" id="s-end" hidden>
+  <h1>Podium !</h1>
+  <div class="podium" id="podium"></div>
+  <div class="board" id="end-rest"></div>
+  <div class="row"><button class="btn" id="end-again">Rejouer</button><button class="btn ghost" id="end-home">Accueil</button></div>
+</section>
+
+<!-- ============ JOUEUR ============ -->
+<section class="screen" id="p-join" hidden>
+  <svg class="logo" viewBox="0 0 200 200" aria-hidden="true"><use href="#emblem"/></svg>
+  <h2>Monte sur le tatami !</h2>
+  <form class="card" id="p-form" autocomplete="off">
+    <label for="p-code">Code de la partie</label>
+    <input class="code" id="p-code" inputmode="numeric" maxlength="4" placeholder="0000">
+    <label for="p-name">Ton prénom ou pseudo</label>
+    <input id="p-name" maxlength="16" placeholder="Ex. Léa">
+    <p class="err" id="p-err"></p>
+    <button class="btn" style="width:100%" id="p-go">Je rejoins</button>
+  </form>
+</section>
+
+<section class="screen" id="p-wait" hidden>
+  <svg class="belt" viewBox="0 0 120 80" aria-hidden="true"><use href="#knot"/></svg>
+  <h2 id="w-title">C'est bon !</h2>
+  <p class="sub" id="w-sub">Regarde le grand écran, ça va commencer…</p>
+  <div class="pill" id="w-score" hidden></div>
+</section>
+
+<section class="screen pq" id="p-q" hidden>
+  <div class="qtop" style="font-size:16px"><span id="pq-num"></span><span id="pq-name"></span></div>
+  <div class="bar"><i id="pq-bar"></i></div>
+  <div class="qmini" id="pq-text"></div>
+  <div class="pbtns" id="pq-btns"></div>
+</section>
+
+<section class="screen" id="p-sent" hidden>
+  <div class="spin"></div>
+  <h2>Réponse envoyée !</h2>
+  <p class="sub">On attend les autres judokas…</p>
+</section>
+
+<section class="screen" id="p-res" hidden>
+  <div class="verdict" id="r-verdict"></div>
+  <p class="sub" id="r-sub"></p>
+  <div class="pill" id="r-pts"></div>
+  <p class="sub" id="r-rank"></p>
+</section>
+
+<section class="screen" id="p-end" hidden>
+  <svg class="logo" viewBox="0 0 200 200" aria-hidden="true"><use href="#emblem"/></svg>
+  <h2 id="pe-title"></h2>
+  <div class="pill" id="pe-score"></div>
+  <p class="sub">Merci d'avoir joué au Quiz du Dojo !</p>
+</section>
+
+<section class="screen" id="p-lost" hidden>
+  <h2>Connexion perdue</h2>
+  <p class="sub" id="lost-msg">Pas de panique, tes points sont gardés.</p>
+  <button class="btn" id="lost-retry">Revenir dans la partie</button>
+</section>
+
+<button class="btn alt fs" id="b-fs" hidden>Plein écran</button>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="knot">
+      <rect x="0" y="22" width="120" height="16" rx="3" fill="#111"/>
+      <path d="M52 34 L34 76 L48 78 L60 44 Z" fill="#111"/>
+      <path d="M68 34 L86 76 L72 78 L60 44 Z" fill="#1b1b1b"/>
+      <rect x="47" y="16" width="26" height="28" rx="6" fill="#222"/>
+      <rect x="47" y="16" width="26" height="6" rx="3" fill="#3a3a3a"/>
+    </g>
+    <g id="emblem">
+      <circle cx="100" cy="100" r="96" fill="#fff"/>
+      <circle cx="100" cy="100" r="84" fill="#e5383b"/>
+      <circle cx="100" cy="100" r="84" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="4 8" opacity=".55"/>
+      <text x="100" y="78" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="34" fill="#fff" letter-spacing="4">JUDO</text>
+      <text x="100" y="122" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="44" fill="#fff" letter-spacing="2">CSAHR</text>
+      <use href="#knot" transform="translate(40 128) scale(1 .7)"/>
+    </g>
+    <path id="sh0" d="M24 4 L46 42 L2 42 Z" fill="#fff"/>
+    <path id="sh1" d="M24 2 L46 24 L24 46 L2 24 Z" fill="#fff"/>
+    <circle id="sh2" cx="24" cy="24" r="21" fill="#fff"/>
+    <rect id="sh3" x="4" y="4" width="40" height="40" rx="4" fill="#fff"/>
+  </defs>
+</svg>
+
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+{
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const show = id => { document.querySelectorAll('.screen').forEach(e => e.hidden = e.id !== id); window.scrollTo(0, 0); };
+const shape = i => `<svg viewBox="0 0 48 48" aria-hidden="true"><use href="#sh${i}"/></svg>`;
+const BROKER = 'wss://broker.hivemq.com:8884/mqtt';
+const TOPIC = 'judo-csahr-quiz/v2/';
+const rid = () => Math.random().toString(36).slice(2, 10);
+const params = new URLSearchParams(location.search);
+const BELTS = ['#ffffff','#f4d20c','#f08a1c','#14a05b','#2390e8','#7a4a26','#111111','#e5383b'];
+const beltOf = name => { let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0; return BELTS[h % BELTS.length]; };
+const store = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch(e){} } };
+const sstore = { get(k){ try { return sessionStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { sessionStorage.setItem(k,v); } catch(e){} } };
+
+/* ---------- Questions ---------- */
+const DEFAULT_Q = [
+  {q:"Comment s'appelle la tenue du judoka ?", a:["Le tatami","Le judogi","Le dojo","Le randori"], c:1, t:20},
+  {q:"Dans quel pays le judo est-il né ?", a:["En Chine","En Corée","Au Japon","En France"], c:2, t:20},
+  {q:"Que fait-on en montant sur le tatami ?", a:["On salue","On court","On crie","On applaudit"], c:0, t:15},
+  {q:"Qui a inventé le judo ?", a:["Bruce Lee","Teddy Riner","Mario","Jigoro Kano"], c:3, t:20},
+  {q:"Que veut dire « Hajime » ?", a:["Arrêtez","Commencez","Saluez","Bravo"], c:1, t:20},
+  {q:"Que veut dire « Matte » ?", a:["Arrêtez / attendez","Plus vite","Tombez","Gagné"], c:0, t:20},
+  {q:"Quelle est la toute première ceinture ?", a:["Jaune","Orange","Blanche","Verte"], c:2, t:15},
+  {q:"Comment s'appelle la salle où l'on fait du judo ?", a:["Le ring","Le dojo","Le terrain","Le stade"], c:1, t:15},
+  {q:"« Judo » veut dire…", a:["La voie de la souplesse","La force du tigre","Le combat rapide","L'art du poing"], c:0, t:20},
+  {q:"Quel est le meilleur score en combat ?", a:["Shido","Waza-ari","Ippon","Hantei"], c:2, t:20},
+  {q:"Comment s'appelle l'art de bien tomber ?", a:["Le kata","Le randori","L'ippon","L'ukemi"], c:3, t:20},
+  {q:"Quel champion olympique français fait du judo ?", a:["Kylian Mbappé","Teddy Riner","Tony Parker","Antoine Dupont"], c:1, t:15}
+];
+const loadQ = () => { try { const v = JSON.parse(store.get('csahr-q')); if (Array.isArray(v) && v.length) return v; } catch(e){} return JSON.parse(JSON.stringify(DEFAULT_Q)); };
+let Q = loadQ();
+const saveQ = () => store.set('csahr-q', JSON.stringify(Q));
+const validQ = () => Q.filter(q => q.q.trim() && q.a.filter(x => x.trim()).length >= 2 && (q.a[q.c] || '').trim());
+const updateCount = () => { const n = validQ().length; $('#qcount').textContent = `${n} question${n > 1 ? 's' : ''} prête${n > 1 ? 's' : ''}`; };
+
+function renderEditor(){
+  $('#qlist').innerHTML = Q.map((q, i) => `
+    <div class="qedit">
+      <div class="head"><span>Question ${i + 1}</span>
+        <span><select data-i="${i}" data-k="t" aria-label="Temps">${[10,15,20,30,45].map(s => `<option value="${s}" ${q.t == s ? 'selected' : ''}>${s} s</option>`).join('')}</select>
+        <button class="x" data-del="${i}">Supprimer</button></span></div>
+      <textarea data-i="${i}" data-k="q" aria-label="Texte de la question">${esc(q.q)}</textarea>
+      <div class="ans">${[0,1,2,3].map(j => `
+        <label><span class="sw c${j}"></span><input type="radio" name="c${i}" data-i="${i}" data-c="${j}" ${q.c === j ? 'checked' : ''} aria-label="Bonne réponse ${j + 1}">
+        <input data-i="${i}" data-a="${j}" value="${esc(q.a[j] || '')}" placeholder="Réponse ${j + 1}"></label>`).join('')}</div>
+    </div>`).join('');
+}
+$('#qlist').addEventListener('input', e => {
+  const t = e.target, i = +t.dataset.i; if (isNaN(i)) return;
+  if (t.dataset.k === 'q') Q[i].q = t.value;
+  else if (t.dataset.k === 't') Q[i].t = +t.value;
+  else if (t.dataset.a !== undefined) Q[i].a[+t.dataset.a] = t.value;
+  else if (t.dataset.c !== undefined) Q[i].c = +t.dataset.c;
+  saveQ();
+});
+$('#qlist').addEventListener('change', e => { if (e.target.dataset.c !== undefined) { Q[+e.target.dataset.i].c = +e.target.dataset.c; saveQ(); } });
+$('#qlist').addEventListener('click', e => { const d = e.target.dataset.del; if (d !== undefined) { Q.splice(+d, 1); saveQ(); renderEditor(); } });
+$('#e-add').onclick = () => { Q.push({q:'', a:['','','',''], c:0, t:20}); saveQ(); renderEditor(); $('#qlist').lastElementChild.querySelector('textarea').focus(); };
+$('#e-reset').onclick = () => { Q = JSON.parse(JSON.stringify(DEFAULT_Q)); saveQ(); renderEditor(); };
+$('#e-done').onclick = () => { if (!validQ().length) { $('#e-err').textContent = 'Il faut au moins une question complète.'; return; } updateCount(); show('s-home'); };
+
+/* ---------- Réseau (PeerJS en ligne, ou BroadcastChannel pour tester sur un seul ordi) ---------- */
+function hostNet(code, local, h){
+  if (local) {
+    const ch = new BroadcastChannel('csahr-' + code);
+    ch.onmessage = e => { const d = e.data; if (d.to !== 'host') return;
+      if (d.m.t === '__close') h.close(d.from); else h.msg(d.from, d.m); };
+    setTimeout(h.ready, 50);
+    return { send:(pid, m) => ch.postMessage({to:pid, m}), stop:() => ch.close() };
+  }
+  if (typeof mqtt === 'undefined') { setTimeout(() => h.error('Internet est nécessaire pour lancer une partie.'), 0); return { send(){}, stop(){} }; }
+  const base = TOPIC + code + '/';
+  const cl = mqtt.connect(BROKER, {clientId:'csahr-h-' + rid(), clean:true, keepalive:20, connectTimeout:10000, reconnectPeriod:2000});
+  let first = true;
+  cl.on('connect', () => cl.subscribe(base + 'host', {qos:1}, err => { if (err) h.error('Connexion au serveur impossible.'); else { first = false; h.ready(); } }));
+  cl.on('offline', () => h.error('Connexion internet perdue, reconnexion…'));
+  cl.on('message', (t, buf) => { let d; try { d = JSON.parse(buf.toString()); } catch(e){ return; }
+    if (!d || typeof d.from !== 'string' || !d.m) return;
+    if (d.m.t === '__close') h.close(d.from); else h.msg(d.from, d.m); });
+  return { send:(pid, m) => cl.publish(base + 'p/' + pid, JSON.stringify(m), {qos:1}), stop:() => cl.end(true) };
+}
+function playerNet(code, local, h){
+  if (local) {
+    const pid = 'p' + Math.random().toString(36).slice(2);
+    const ch = new BroadcastChannel('csahr-' + code);
+    ch.onmessage = e => { if (e.data.to === pid) h.msg(e.data.m); };
+    addEventListener('beforeunload', () => ch.postMessage({to:'host', from:pid, m:{t:'__close'}}));
+    setTimeout(h.open, 50);
+    return { send:m => ch.postMessage({to:'host', from:pid, m}), stop:() => ch.close() };
+  }
+  if (typeof mqtt === 'undefined') { setTimeout(() => h.error('Pas de connexion internet.'), 0); return { send(){}, stop(){} }; }
+  const base = TOPIC + code + '/', pid = sstore.get('csahr-pid') || rid();
+  sstore.set('csahr-pid', pid);
+  const cl = mqtt.connect(BROKER, {clientId:'csahr-p-' + pid + rid().slice(0, 3), clean:true, keepalive:20, connectTimeout:10000, reconnectPeriod:2000,
+    will:{topic:base + 'host', payload:JSON.stringify({from:pid, m:{t:'__close'}}), qos:1, retain:false}});
+  cl.on('connect', () => cl.subscribe(base + 'p/' + pid, {qos:1}, err => { if (!err) h.open(); }));
+  cl.on('message', (t, buf) => { let d; try { d = JSON.parse(buf.toString()); } catch(e){ return; } h.msg(d); });
+  return { send:m => cl.publish(base + 'host', JSON.stringify({from:pid, m}), {qos:1}), stop:() => { try { cl.end(true); } catch(e){} } };
+}
+
+/* ---------- ANIMATEUR ---------- */
+let H = null;
+const rank = () => [...H.players.values()].sort((a, b) => b.score - a.score);
+const active = () => [...H.players.values()].filter(p => p.on);
+const curQ = () => H.qs[H.qi];
+
+function startHost(local){
+  const qs = validQ(); if (!qs.length) { renderEditor(); show('s-edit'); return; }
+  const code = String(1000 + Math.floor(Math.random() * 9000));
+  H = {code, local, qs, players:new Map(), pid2key:new Map(), phase:'lobby', qi:-1, start:0, limit:0, tick:null, counts:[0,0,0,0]};
+  show('s-lobby'); $('#b-fs').hidden = false;
+  $('#l-code').textContent = code; $('#l-status').textContent = 'Connexion au serveur…';
+  $('#l-players').innerHTML = ''; $('#l-start').disabled = true; $('#l-title').textContent = 'En attente des judokas…';
+  const base = location.origin + location.pathname;
+  const url = base + '?code=' + code + (local ? '&local=1' : '');
+  H.url = url;
+  $('#l-url').textContent = (location.host + location.pathname).replace(/index\.html$/, '') || 'ce site';
+  $('#qr').innerHTML = '';
+  if (typeof QRCode !== 'undefined') new QRCode($('#qr'), {text:url, width:300, height:300, correctLevel:QRCode.CorrectLevel.M});
+  else $('#qr').innerHTML = '<span style="color:#121735;line-height:1.3">QR indisponible</span>';
+  H.net = hostNet(code, local, {
+    ready: () => { if (local) $('#l-status').innerHTML = `Mode test : <a href="${esc(url)}" target="_blank" style="color:#fff">ouvre ce lien dans un nouvel onglet</a> pour chaque joueur.`; else $('#l-status').textContent = 'Scanne le QR code avec ton téléphone !'; },
+    error: m => { if (m === 'retry') { H.net.stop(); startHost(local); } else $('#l-status').textContent = m; },
+    msg: onHostMsg, close: onHostClose
+  });
+}
+
+function onHostMsg(pid, m){
+  if (!H || !m || typeof m !== 'object') return;
+  if (m.t === 'join') {
+    let name = String(m.name || '').replace(/\s+/g, ' ').trim().slice(0, 16) || 'Judoka';
+    let key = name.toLowerCase(), p = H.players.get(key);
+    if (p && p.on && p.pid !== pid) { let n = 2; while (H.players.has((name + ' ' + n).toLowerCase())) n++; name += ' ' + n; key = name.toLowerCase(); p = null; }
+    if (!p) { p = {name, key, score:0, ans:{}}; H.players.set(key, p); }
+    p.pid = pid; p.on = true; H.pid2key.set(pid, key);
+    H.net.send(pid, {t:'welcome', name:p.name, score:p.score, started:H.phase !== 'lobby'});
+    if (H.phase === 'question' && !p.ans[H.qi]) sendQ(pid);
+    renderLobby(); renderCount();
+  } else if (m.t === 'answer') {
+    const p = H.players.get(H.pid2key.get(pid)); const q = curQ();
+    if (!p || H.phase !== 'question' || m.q !== H.qi || p.ans[H.qi]) return;
+    const a = m.a | 0; if (!(q.a[a] || '').trim()) return;
+    const el = Math.min(Date.now() - H.start, H.limit);
+    const ok = a === q.c, pts = ok ? Math.round(1000 * (1 - el / H.limit / 2)) : 0;
+    p.ans[H.qi] = {a, ok, pts}; p.score += pts; H.counts[a]++;
+    H.net.send(pid, {t:'ack'}); renderCount();
+    if (active().every(x => x.ans[H.qi])) reveal();
+  }
+}
+function onHostClose(pid){
+  if (!H) return; const key = H.pid2key.get(pid); const p = H.players.get(key); H.pid2key.delete(pid);
+  if (!p || p.pid !== pid) return;
+  if (H.phase === 'lobby') H.players.delete(key); else p.on = false;
+  renderLobby(); renderCount();
+  if (H.phase === 'question' && active().length && active().every(x => x.ans[H.qi])) reveal();
+}
+function renderLobby(){
+  if (H.phase !== 'lobby') return;
+  const ps = [...H.players.values()];
+  H.seen = H.seen || new Set();
+  $('#l-players').innerHTML = ps.map(p => `<span class="chip ${p.on ? '' : 'off'} ${H.seen.has(p.key) ? 'old' : ''}"><i style="background:${beltOf(p.name)}"></i>${esc(p.name)}</span>`).join('');
+  ps.forEach(p => H.seen.add(p.key));
+  const n = ps.filter(p => p.on).length;
+  $('#l-title').textContent = n ? `${n} judoka${n > 1 ? 's' : ''} sur le tatami` : 'En attente des judokas…';
+  $('#l-start').disabled = !n; $('#l-start').textContent = n ? `Commencer (${n})` : 'Commencer';
+}
+function renderCount(){
+  if (!H || H.phase !== 'question') return;
+  const n = active().filter(p => p.ans[H.qi]).length, tot = active().length;
+  $('#q-count').textContent = `${n}/${tot} réponse${n > 1 ? 's' : ''}`;
+}
+function sendQ(pid){
+  const q = curQ();
+  H.net.send(pid, {t:'q', i:H.qi, n:H.qs.length, q:q.q, a:q.a.map(x => x.trim()), ms:Math.max(0, H.limit - (Date.now() - H.start))});
+}
+function startQuestion(i){
+  H.qi = i; H.phase = 'question'; H.counts = [0,0,0,0];
+  const q = curQ(); H.limit = (q.t || 20) * 1000; H.start = Date.now();
+  $('#q-num').textContent = `Question ${i + 1}/${H.qs.length}`;
+  $('#q-text').textContent = q.q;
+  $('#q-tiles').innerHTML = q.a.map((a, j) => a.trim() ? `<div class="tile c${j}" data-j="${j}">${shape(j)}<span>${esc(a)}</span><span class="n" hidden>0</span></div>` : '').join('');
+  $('#q-skip').hidden = false; $('#q-next').hidden = true;
+  show('s-q'); renderCount();
+  active().forEach(p => sendQ(p.pid));
+  clearInterval(H.tick);
+  const tick = () => { const left = Math.max(0, Math.ceil((H.limit - (Date.now() - H.start)) / 1000));
+    $('#q-timer').textContent = left; $('#q-timer').classList.toggle('low', left <= 5); if (left <= 0) reveal(); };
+  tick(); H.tick = setInterval(tick, 200);
+}
+function reveal(){
+  if (H.phase !== 'question') return;
+  clearInterval(H.tick); H.phase = 'reveal';
+  const q = curQ();
+  document.querySelectorAll('#q-tiles .tile').forEach(t => { const j = +t.dataset.j;
+    t.classList.toggle('good', j === q.c); t.classList.toggle('dim', j !== q.c);
+    const n = t.querySelector('.n'); n.hidden = false; n.textContent = H.counts[j]; });
+  $('#q-skip').hidden = true; $('#q-next').hidden = false;
+  $('#q-next').textContent = H.qi + 1 < H.qs.length ? 'Classement' : 'Voir le podium';
+  const r = rank();
+  r.forEach((p, k) => { if (!p.on) return; const a = p.ans[H.qi];
+    H.net.send(p.pid, {t:'res', ok:!!(a && a.ok), none:!a, pts:a ? a.pts : 0, score:p.score, rank:k + 1, n:r.length, good:q.a[q.c].trim()}); });
+}
+function showBoard(){
+  H.phase = 'board';
+  const r = rank().slice(0, 5), top = Math.max(1, r[0] ? r[0].score : 1);
+  $('#b-list').innerHTML = r.map((p, k) => `<div class="brow"><span class="rk">${k + 1}</span><i style="width:22px;height:22px;border-radius:50%;background:${beltOf(p.name)};border:3px solid #0002;flex:none"></i><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('') || '<p class="sub">Personne n\'a encore joué.</p>';
+  show('s-board');
+}
+function endGame(){
+  H.phase = 'end'; clearInterval(H.tick);
+  const r = rank();
+  const order = [1, 0, 2];
+  $('#podium').innerHTML = order.map(k => r[k] ? `<div class="step p${k + 1}"><b>${esc(r[k].name)}</b><span class="pill">${r[k].score} pts</span><div class="block">${k + 1}</div></div>` : '<div class="step"></div>').join('');
+  $('#end-rest').innerHTML = r.slice(3, 10).map((p, k) => `<div class="brow"><span class="rk">${k + 4}</span><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('');
+  show('s-end');
+  r.forEach((p, k) => p.on && H.net.send(p.pid, {t:'end', rank:k + 1, n:r.length, score:p.score}));
+}
+$('#b-host').onclick = () => startHost(false);
+$('#b-local').onclick = () => startHost(true);
+$('#b-edit').onclick = () => { renderEditor(); show('s-edit'); };
+$('#b-iamplayer').onclick = () => playerJoin(params.get('local') === '1' || !!(H && H.local));
+$('#l-start').onclick = () => startQuestion(0);
+$('#l-quit').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
+$('#q-skip').onclick = reveal;
+$('#q-next').onclick = () => H.qi + 1 < H.qs.length ? showBoard() : endGame();
+$('#b-next').onclick = () => startQuestion(H.qi + 1);
+$('#end-again').onclick = () => {
+  for (const [k, p] of H.players) { if (!p.on) H.players.delete(k); else { p.score = 0; p.ans = {}; } }
+  H.phase = 'lobby'; H.qi = -1; H.qs = validQ();
+  active().forEach(p => H.net.send(p.pid, {t:'lobby'}));
+  show('s-lobby'); renderLobby();
+};
+$('#end-home').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
+$('#b-fs').onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch(e){} };
+
+/* ---------- JOUEUR ---------- */
+let P = null;
+function playerJoin(local){
+  P = {local};
+  $('#p-code').value = params.get('code') || '';
+  $('#p-name').value = sstore.get('csahr-name') || '';
+  $('#p-err').textContent = '';
+  show('p-join');
+  ($('#p-code').value ? $('#p-name') : $('#p-code')).focus();
+}
+function connectPlayer(){
+  if (P.net) P.net.stop();
+  P.answered = -1;
+  clearTimeout(P.timer);
+  P.timer = setTimeout(() => { if (P.joined) return; $('#p-err').textContent = 'Aucune partie trouvée avec ce code. Vérifie le code et que la partie est bien lancée sur le grand écran.'; $('#p-go').disabled = false; show('p-join'); }, 12000);
+  P.net = playerNet(P.code, P.local, {
+    open: () => P.net.send({t:'join', name:P.name}),
+    msg: onPlayerMsg,
+    close: () => { $('#lost-msg').textContent = 'Pas de panique, tes points sont gardés.'; show('p-lost'); },
+    error: m => { if (P.joined) { $('#lost-msg').textContent = m; show('p-lost'); } else { $('#p-err').textContent = m; $('#p-go').disabled = false; show('p-join'); } }
+  });
+}
+$('#p-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const code = $('#p-code').value.replace(/\D/g, ''), name = $('#p-name').value.trim();
+  if (code.length !== 4) { $('#p-err').textContent = 'Le code a 4 chiffres.'; return; }
+  if (!name) { $('#p-err').textContent = 'Écris ton prénom.'; return; }
+  P.code = code; P.name = name; sstore.set('csahr-name', name);
+  $('#p-err').textContent = 'Connexion…'; $('#p-go').disabled = true;
+  connectPlayer();
+});
+$('#lost-retry').onclick = connectPlayer;
+let barRaf = 0;
+function onPlayerMsg(m){
+  if (!m || typeof m !== 'object') return;
+  if (m.t === 'welcome') {
+    P.joined = true; P.name = m.name; $('#p-go').disabled = false;
+    $('#w-title').textContent = `C'est bon ${m.name} !`;
+    $('#w-sub').textContent = m.started ? 'Tu es dans la partie, la prochaine question arrive…' : 'Regarde le grand écran, ça va commencer…';
+    $('#w-score').hidden = !m.score; $('#w-score').textContent = m.score + ' pts';
+    show('p-wait');
+  } else if (m.t === 'q') {
+    P.answered = -1; P.qi = m.i;
+    $('#pq-num').textContent = `Question ${m.i + 1}/${m.n}`; $('#pq-name').textContent = P.name;
+    $('#pq-text').textContent = m.q;
+    const n = m.a.filter(Boolean).length;
+    $('#pq-btns').className = 'pbtns' + (n <= 2 ? ' two' : '');
+    $('#pq-btns').innerHTML = m.a.map((a, j) => a ? `<button class="pbtn c${j}" data-j="${j}">${shape(j)}<span>${esc(a)}</span></button>` : '').join('');
+    show('p-q');
+    const end = Date.now() + m.ms, total = Math.max(m.ms, 1);
+    cancelAnimationFrame(barRaf);
+    const step = () => { const left = Math.max(0, end - Date.now()); $('#pq-bar').style.width = (left / total * 100) + '%'; if (left > 0) barRaf = requestAnimationFrame(step); };
+    step();
+  } else if (m.t === 'ack') {
+    show('p-sent');
+  } else if (m.t === 'res') {
+    cancelAnimationFrame(barRaf);
+    const s = $('#p-res'); s.classList.toggle('res-ok', m.ok); s.classList.toggle('res-ko', !m.ok);
+    $('#r-verdict').textContent = m.ok ? (m.pts >= 800 ? 'Ippon !' : 'Waza-ari !') : (m.none ? 'Trop tard !' : 'Raté…');
+    $('#r-sub').textContent = m.ok ? 'Bonne réponse, bravo !' : 'La bonne réponse : ' + m.good;
+    $('#r-pts').textContent = (m.ok ? '+' + m.pts : '+0') + ' · ' + m.score + ' pts';
+    $('#r-rank').textContent = `Tu es ${m.rank === 1 ? '1er' : m.rank + 'e'} sur ${m.n}`;
+    show('p-res');
+  } else if (m.t === 'end') {
+    $('#pe-title').textContent = m.rank === 1 ? 'Champion du dojo !' : m.rank <= 3 ? `Sur le podium : ${m.rank}e !` : `Tu finis ${m.rank}e sur ${m.n}`;
+    $('#pe-score').textContent = m.score + ' pts';
+    show('p-end');
+  } else if (m.t === 'lobby') {
+    $('#w-title').textContent = 'Nouvelle partie !'; $('#w-sub').textContent = 'Regarde le grand écran, ça va recommencer…'; $('#w-score').hidden = true;
+    show('p-wait');
+  }
+}
+$('#pq-btns').addEventListener('click', e => {
+  const b = e.target.closest('.pbtn'); if (!b || P.answered === P.qi) return;
+  P.answered = P.qi;
+  document.querySelectorAll('.pbtn').forEach(x => x.disabled = true);
+  P.net.send({t:'answer', q:P.qi, a:+b.dataset.j});
+});
+
+/* ---------- Démarrage ---------- */
+updateCount();
+if (params.has('code')) playerJoin(params.get('local') === '1');
+else show('s-home');
+}
+</script>
+</body>
+</html>
