@@ -175,6 +175,8 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   <div class="editor" id="qlist"></div>
   <div class="sticky">
     <button class="btn alt" id="e-add">+ Ajouter une question</button>
+    <button class="btn gold" id="e-copy">Copier mes questions</button>
+    <button class="btn alt" id="e-import">Coller des questions</button>
     <button class="btn ghost" id="e-reset">Remettre les questions de base</button>
     <button class="btn" id="e-done">Terminé</button>
   </div>
@@ -299,6 +301,16 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
     <div id="aqr" style="line-height:0"></div>
     <a id="a-link" target="_blank" class="small" style="color:var(--sky)">Ouvrir le lien de la télécommande</a>
     <button class="btn" id="a-close">Fermer</button>
+  </div>
+</div>
+
+<div class="overlay" id="ex-ov" hidden>
+  <div class="card" style="display:flex;flex-direction:column;gap:12px;width:min(100%,720px)">
+    <h2 style="color:var(--ink)" id="ex-title">Mes questions</h2>
+    <p style="margin:0" id="ex-help"></p>
+    <textarea id="ex-text" style="min-height:240px;font:600 13px ui-monospace,monospace" spellcheck="false"></textarea>
+    <p class="err" id="ex-err"></p>
+    <div class="row"><button class="btn gold" id="ex-ok">Copier</button><button class="btn alt" id="ex-close">Fermer</button></div>
   </div>
 </div>
 
@@ -533,6 +545,39 @@ $('#qlist').addEventListener('click', e => { const d = e.target.dataset.del; if 
 $('#e-add').onclick = () => { curT().qs.push({q:'', a:['','','',''], c:0, t:20}); saveThemes(); renderEditor(); const l = $('#qlist').lastElementChild; if (l) l.querySelector('textarea').focus(); };
 $('#e-reset').onclick = () => { const d = DEFAULT_THEMES.find(t => t.id === eTab); curT().qs = clone(d.qs); saveThemes(); renderEditor(); };
 $('#e-done').onclick = () => { updateCount(); show('s-home'); };
+
+/* Copier / coller toutes les questions */
+let exMode = 'copy';
+const exportText = () => { const o = {}; THEMES.forEach(t => o[t.id] = t.qs); return JSON.stringify({quiz:'csahr-plusnul', v:1, themes:o}, null, 1); };
+async function copyText(txt){ try { await navigator.clipboard.writeText(txt); return true; } catch(e){ const ta = $('#ex-text'); ta.focus(); ta.select(); try { return document.execCommand('copy'); } catch(e2){ return false; } } }
+$('#e-copy').onclick = async () => {
+  exMode = 'copy';
+  $('#ex-title').textContent = 'Copier mes questions';
+  $('#ex-help').textContent = 'Toutes tes questions sont dans ce texte. Il est copié : colle-le dans la conversation avec Claude (ou dans un fichier pour les garder).';
+  $('#ex-text').value = exportText(); $('#ex-text').readOnly = true; $('#ex-err').textContent = '';
+  $('#ex-ok').textContent = 'Copier'; $('#ex-ov').hidden = false;
+  const ok = await copyText($('#ex-text').value);
+  $('#ex-err').style.color = ok ? 'var(--green)' : 'var(--red)';
+  $('#ex-err').textContent = ok ? 'Copié ! Tu peux le coller où tu veux.' : 'Copie automatique impossible : sélectionne tout le texte et copie-le à la main.';
+};
+$('#e-import').onclick = () => {
+  exMode = 'import';
+  $('#ex-title').textContent = 'Coller des questions';
+  $('#ex-help').textContent = 'Colle ici un texte obtenu avec « Copier mes questions ». Les matières qu\'il contient remplaceront les tiennes.';
+  $('#ex-text').value = ''; $('#ex-text').readOnly = false; $('#ex-err').textContent = '';
+  $('#ex-ok').textContent = 'Importer'; $('#ex-ov').hidden = false; $('#ex-text').focus();
+};
+$('#ex-ok').onclick = async () => {
+  if (exMode === 'copy') { const ok = await copyText($('#ex-text').value); $('#ex-err').style.color = ok ? 'var(--green)' : 'var(--red)'; $('#ex-err').textContent = ok ? 'Copié !' : 'Sélectionne le texte et copie-le à la main.'; return; }
+  let d; try { d = JSON.parse($('#ex-text').value); } catch(e){ $('#ex-err').style.color = 'var(--red)'; $('#ex-err').textContent = 'Ce texte n\'est pas reconnu.'; return; }
+  const src = d && d.themes; let n = 0;
+  if (src && typeof src === 'object') THEMES.forEach(t => { const qs = src[t.id]; if (!Array.isArray(qs)) return;
+    t.qs = qs.filter(q => q && typeof q.q === 'string' && Array.isArray(q.a)).map(q => ({q:q.q, a:[0,1,2,3].map(j => String(q.a[j] || '')), c:Math.min(Math.max(q.c | 0, 0), 3), t:[10,15,20,30,45].includes(q.t) ? q.t : 20}));
+    n += t.qs.length; });
+  if (!n) { $('#ex-err').style.color = 'var(--red)'; $('#ex-err').textContent = 'Aucune question trouvée dans ce texte.'; return; }
+  saveThemes(); renderEditor(); updateCount(); $('#ex-ov').hidden = true;
+};
+$('#ex-close').onclick = () => { $('#ex-ov').hidden = true; };
 
 /* ---------- Réseau (relais MQTT en ligne, ou BroadcastChannel pour tester sur un seul ordi) ---------- */
 function hostNet(code, local, h){
