@@ -110,6 +110,9 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 .spin{width:64px;height:64px;border-radius:50%;border:7px solid rgba(255,255,255,.3);border-top-color:#fff;animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .fs{position:fixed;top:12px;right:12px;z-index:5}
+.overlay{position:fixed;inset:0;background:rgba(8,16,50,.75);display:grid;place-items:center;padding:16px;z-index:10;color:var(--ink);text-align:center}
+.overlay[hidden]{display:none}
+#aqr img,#aqr canvas{width:min(260px,60vw)!important;height:auto!important}
 @media(max-width:800px){.lobby{grid-template-columns:minmax(0,1fr)}.tiles{grid-template-columns:minmax(0,1fr)}.tile{min-height:70px}.p1 .block{height:170px}.p2 .block{height:120px}.p3 .block{height:90px}}
 @media(max-width:600px){.ans{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -160,6 +163,7 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
       <div class="chips" id="l-players"></div>
       <div class="row">
         <button class="btn" id="l-start" disabled>Commencer</button>
+        <button class="btn alt" id="l-admin">Télécommande</button>
         <button class="btn ghost" id="l-quit">Retour</button>
       </div>
     </div>
@@ -241,6 +245,31 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   <h2>Connexion perdue</h2>
   <p class="sub" id="lost-msg">Pas de panique, tes points sont gardés.</p>
   <button class="btn" id="lost-retry">Revenir dans la partie</button>
+</section>
+
+<div class="overlay" id="admin-ov" hidden>
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:12px">
+    <h2 style="color:var(--blue-d)">Télécommande animateur</h2>
+    <p style="margin:0">Scanne avec <b>ton</b> téléphone pour faire défiler les questions à distance. Ne montre pas ce QR aux enfants.</p>
+    <div id="aqr" style="line-height:0"></div>
+    <a id="a-link" target="_blank" class="small" style="color:var(--blue)">Ouvrir le lien de la télécommande</a>
+    <button class="btn" id="a-close">Fermer</button>
+  </div>
+</div>
+
+<section class="screen" id="a-panel" hidden>
+  <p class="sub">Télécommande animateur</p>
+  <h2 id="a-title">Connexion…</h2>
+  <div class="card" id="a-card" hidden style="text-align:left">
+    <div class="small" id="a-step" style="opacity:1;color:var(--muted);font-weight:800"></div>
+    <div id="a-q" style="font-weight:900;font-size:20px;line-height:1.2;margin:6px 0"></div>
+    <div id="a-good" style="font-weight:800;color:var(--green)"></div>
+    <div id="a-info" style="font-weight:800;margin-top:8px"></div>
+    <div id="a-top" class="small" style="margin-top:8px;color:var(--ink)"></div>
+  </div>
+  <button class="btn" id="a-next" style="width:min(100%,420px);min-height:84px;font-size:24px" disabled>…</button>
+  <button class="btn alt" id="a-skip" hidden>Arrêter le chrono</button>
+  <p class="err" id="a-err" style="color:#fff"></p>
 </section>
 
 <button class="btn alt fs" id="b-fs" hidden>Plein écran</button>
@@ -427,13 +456,17 @@ const curQ = () => H.qs[H.qi];
 function startHost(local){
   const qs = validQ(); if (!qs.length) { renderEditor(); show('s-edit'); return; }
   const code = String(1000 + Math.floor(Math.random() * 9000));
-  H = {code, local, qs, players:new Map(), pid2key:new Map(), phase:'lobby', qi:-1, start:0, limit:0, tick:null, counts:[0,0,0,0]};
+  H = {code, local, qs, players:new Map(), pid2key:new Map(), phase:'lobby', qi:-1, start:0, limit:0, tick:null, counts:[0,0,0,0], pin:rid(), admins:new Set()};
   show('s-lobby'); $('#b-fs').hidden = false;
   $('#l-code').textContent = code; $('#l-status').textContent = 'Connexion au serveur…';
   $('#l-players').innerHTML = ''; $('#l-start').disabled = true; $('#l-title').textContent = 'En attente des judokas…';
   const base = location.origin + location.pathname;
   const url = base + '?code=' + code + (local ? '&local=1' : '');
   H.url = url;
+  H.adminUrl = base + '?code=' + code + '&admin=' + H.pin + (local ? '&local=1' : '');
+  $('#aqr').innerHTML = '';
+  if (typeof QRCode !== 'undefined') new QRCode($('#aqr'), {text:H.adminUrl, width:260, height:260, correctLevel:QRCode.CorrectLevel.M});
+  $('#a-link').href = H.adminUrl;
   $('#l-url').textContent = (location.host + location.pathname).replace(/index\.html$/, '') || 'ce site';
   $('#qr').innerHTML = '';
   if (typeof QRCode !== 'undefined') new QRCode($('#qr'), {text:url, width:300, height:300, correctLevel:QRCode.CorrectLevel.M});
@@ -465,7 +498,32 @@ function onHostMsg(pid, m){
     p.ans[H.qi] = {a, ok, pts}; p.score += pts; H.counts[a]++;
     H.net.send(pid, {t:'ack'}); renderCount();
     if (active().every(x => x.ans[H.qi])) reveal();
+  } else if (m.t === 'admin') {
+    if (m.pin !== H.pin) { H.net.send(pid, {t:'adeny'}); return; }
+    H.admins.add(pid); pushAdmin();
+  } else if (m.t === 'cmd' && H.admins.has(pid)) {
+    if (m.c === 'next') hostNext();
+    else if (m.c === 'skip' && H.phase === 'question') reveal();
+    else pushAdmin();
   }
+}
+const nextLabel = () => ({lobby:'Commencer', question:'Montrer la réponse', reveal:H.qi + 1 < H.qs.length ? 'Classement' : 'Voir le podium', board:'Question suivante', end:'Rejouer'})[H.phase];
+function pushAdmin(){
+  if (!H || !H.admins.size) return;
+  const q = H.qi >= 0 ? curQ() : null, act = active();
+  const st = {t:'astate', phase:H.phase, label:nextLabel(), players:act.length, qi:H.qi, n:H.qs.length,
+    q:q ? q.q : '', good:q ? q.a[q.c].trim() : '', answered:q ? act.filter(p => p.ans[H.qi]).length : 0,
+    canNext:H.phase !== 'lobby' || act.length > 0, top:rank().slice(0, 3).map(p => p.name + ' · ' + p.score)};
+  H.admins.forEach(a => H.net.send(a, st));
+}
+function hostNext(){
+  if (!H) return;
+  if (H.phase === 'lobby') { if (active().length) startQuestion(0); }
+  else if (H.phase === 'question') reveal();
+  else if (H.phase === 'reveal') H.qi + 1 < H.qs.length ? showBoard() : endGame();
+  else if (H.phase === 'board') startQuestion(H.qi + 1);
+  else if (H.phase === 'end') again();
+  pushAdmin();
 }
 function onHostClose(pid){
   if (!H) return; const key = H.pid2key.get(pid); const p = H.players.get(key); H.pid2key.delete(pid);
@@ -483,18 +541,20 @@ function renderLobby(){
   const n = ps.filter(p => p.on).length;
   $('#l-title').textContent = n ? `${n} judoka${n > 1 ? 's' : ''} sur le tatami` : 'En attente des judokas…';
   $('#l-start').disabled = !n; $('#l-start').textContent = n ? `Commencer (${n})` : 'Commencer';
+  pushAdmin();
 }
 function renderCount(){
   if (!H || H.phase !== 'question') return;
   const n = active().filter(p => p.ans[H.qi]).length, tot = active().length;
   $('#q-count').textContent = `${n}/${tot} réponse${n > 1 ? 's' : ''}`;
+  pushAdmin();
 }
 function sendQ(pid){
   const q = curQ();
   H.net.send(pid, {t:'q', i:H.qi, n:H.qs.length, q:q.q, a:q.a.map(x => x.trim()), ms:Math.max(0, H.limit - (Date.now() - H.start))});
 }
 function startQuestion(i){
-  H.qi = i; H.phase = 'question'; H.counts = [0,0,0,0];
+  H.qi = i; H.phase = 'question'; H.counts = [0,0,0,0]; $('#admin-ov').hidden = true;
   const q = curQ(); H.limit = (q.t || 20) * 1000; H.start = Date.now();
   $('#q-num').textContent = `Question ${i + 1}/${H.qs.length}`;
   $('#q-text').textContent = q.q;
@@ -519,12 +579,13 @@ function reveal(){
   const r = rank();
   r.forEach((p, k) => { if (!p.on) return; const a = p.ans[H.qi];
     H.net.send(p.pid, {t:'res', ok:!!(a && a.ok), none:!a, pts:a ? a.pts : 0, score:p.score, rank:k + 1, n:r.length, good:q.a[q.c].trim()}); });
+  pushAdmin();
 }
 function showBoard(){
   H.phase = 'board';
   const r = rank().slice(0, 5), top = Math.max(1, r[0] ? r[0].score : 1);
   $('#b-list').innerHTML = r.map((p, k) => `<div class="brow"><span class="rk">${k + 1}</span><span class="av-m">${judoka(p.av)}</span><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('') || '<p class="sub">Personne n\'a encore joué.</p>';
-  show('s-board');
+  show('s-board'); pushAdmin();
 }
 function endGame(){
   H.phase = 'end'; clearInterval(H.tick);
@@ -534,22 +595,26 @@ function endGame(){
   $('#end-rest').innerHTML = r.slice(3, 10).map((p, k) => `<div class="brow"><span class="rk">${k + 4}</span><span class="av-m">${judoka(p.av)}</span><span>${esc(p.name)}</span><span class="sc">${p.score}</span></div>`).join('');
   show('s-end');
   r.forEach((p, k) => p.on && H.net.send(p.pid, {t:'end', rank:k + 1, n:r.length, score:p.score}));
+  pushAdmin();
+}
+function again(){
+  for (const [k, p] of H.players) { if (!p.on) H.players.delete(k); else { p.score = 0; p.ans = {}; } }
+  H.phase = 'lobby'; H.qi = -1; H.qs = validQ();
+  active().forEach(p => H.net.send(p.pid, {t:'lobby'}));
+  show('s-lobby'); renderLobby();
 }
 $('#b-host').onclick = () => startHost(false);
 $('#b-local').onclick = () => startHost(true);
 $('#b-edit').onclick = () => { renderEditor(); show('s-edit'); };
 $('#b-iamplayer').onclick = () => playerJoin(params.get('local') === '1' || !!(H && H.local));
-$('#l-start').onclick = () => startQuestion(0);
+$('#l-start').onclick = hostNext;
 $('#l-quit').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
-$('#q-skip').onclick = reveal;
-$('#q-next').onclick = () => H.qi + 1 < H.qs.length ? showBoard() : endGame();
-$('#b-next').onclick = () => startQuestion(H.qi + 1);
-$('#end-again').onclick = () => {
-  for (const [k, p] of H.players) { if (!p.on) H.players.delete(k); else { p.score = 0; p.ans = {}; } }
-  H.phase = 'lobby'; H.qi = -1; H.qs = validQ();
-  active().forEach(p => H.net.send(p.pid, {t:'lobby'}));
-  show('s-lobby'); renderLobby();
-};
+$('#q-skip').onclick = hostNext;
+$('#q-next').onclick = hostNext;
+$('#b-next').onclick = hostNext;
+$('#end-again').onclick = hostNext;
+$('#l-admin').onclick = () => { $('#admin-ov').hidden = false; };
+$('#a-close').onclick = () => { $('#admin-ov').hidden = true; };
 $('#end-home').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
 $('#b-fs').onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch(e){} };
 
@@ -651,9 +716,41 @@ $('#pq-btns').addEventListener('click', e => {
   P.net.send({t:'answer', q:P.qi, a:+b.dataset.j});
 });
 
+/* ---------- TÉLÉCOMMANDE ANIMATEUR ---------- */
+let A = null;
+function adminJoin(){
+  const code = (params.get('code') || '').replace(/\D/g, ''), pin = params.get('admin');
+  A = {ok:false};
+  show('a-panel');
+  const fail = msg => { $('#a-title').textContent = 'Pas connecté'; $('#a-err').textContent = msg; };
+  const t = setTimeout(() => { if (!A.ok) fail('Partie introuvable. Rescanne le QR « Télécommande » sur le grand écran.'); }, 12000);
+  A.net = playerNet(code, params.get('local') === '1', {
+    open: () => A.net.send({t:'admin', pin}),
+    error: fail,
+    msg: m => {
+      if (!m) return;
+      if (m.t === 'adeny') { clearTimeout(t); fail('Lien de télécommande invalide.'); return; }
+      if (m.t !== 'astate') return;
+      A.ok = true; clearTimeout(t); $('#a-err').textContent = '';
+      $('#a-title').textContent = {lobby:'Salle d\'attente', question:'Question en cours', reveal:'Réponse affichée', board:'Classement', end:'Podium'}[m.phase] || '';
+      $('#a-card').hidden = false;
+      $('#a-step').textContent = m.qi >= 0 ? `Question ${m.qi + 1}/${m.n}` : `${m.n} questions prêtes`;
+      $('#a-q').textContent = m.q;
+      $('#a-good').textContent = m.good ? '✓ ' + m.good : '';
+      $('#a-info').textContent = m.phase === 'question' ? `${m.answered}/${m.players} ont répondu` : `${m.players} joueur${m.players > 1 ? 's' : ''} connecté${m.players > 1 ? 's' : ''}`;
+      $('#a-top').textContent = m.top.length ? 'Top : ' + m.top.join('  ·  ') : '';
+      $('#a-next').textContent = m.label; $('#a-next').disabled = !m.canNext;
+      $('#a-skip').hidden = m.phase !== 'question';
+    }
+  });
+}
+$('#a-next').onclick = () => { if (A && A.ok) { A.net.send({t:'cmd', c:'next'}); $('#a-next').disabled = true; } };
+$('#a-skip').onclick = () => { if (A && A.ok) A.net.send({t:'cmd', c:'skip'}); };
+
 /* ---------- Démarrage ---------- */
 updateCount();
-if (params.has('code')) playerJoin(params.get('local') === '1');
+if (params.has('admin')) adminJoin();
+else if (params.has('code')) playerJoin(params.get('local') === '1');
 else show('s-home');
 }
 </script>
