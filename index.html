@@ -140,7 +140,21 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 .sw-t{min-height:36px;border-radius:10px;border:3px solid #d6dbef;background:#fff;color:var(--ink);font:800 14px Nunito,sans-serif;padding:0 10px;cursor:pointer}
 .sw-b.on,.sw-t.on{border-color:var(--sky);box-shadow:0 0 0 2px var(--sky)}
 .status{font-weight:900;border-radius:999px;padding:6px 14px;background:rgba(255,255,255,.15)}
-.fs{position:fixed;top:12px;right:12px;z-index:5}
+.topbar{position:fixed;top:12px;right:12px;z-index:6;display:flex;gap:8px}
+.topbar .btn{min-height:44px;padding:8px 14px;font-size:15px}
+.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;width:min(100%,960px)}
+.mode-card{border:0;border-radius:22px;padding:28px 22px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;font:700 17px Nunito,sans-serif;color:var(--ink);background:#fff;box-shadow:0 9px 0 rgba(0,0,0,.3);transition:transform .15s}
+.mode-card:hover{transform:translateY(-4px)}
+.mode-card .em{font-size:64px;line-height:1}.mode-card b{font-family:Anton,sans-serif;font-weight:400;font-size:clamp(26px,3vw,36px)}
+.mode-card.nul{background:linear-gradient(160deg,var(--yellow),#ff8a1c)}.mode-card.cl{background:linear-gradient(160deg,#7fd3ff,#2390e8);color:#fff}
+.rk-n{font-family:Anton,sans-serif;font-size:26px;color:var(--sky);width:36px;text-align:center}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:clamp(10px,2vw,24px);width:min(100%,860px)}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
+.step b{font-family:Anton,sans-serif;font-weight:400;font-size:clamp(20px,2.6vw,30px);word-break:break-word}
+.block{width:100%;border-radius:16px 16px 0 0;display:grid;place-items:center;font-family:Anton,sans-serif;font-size:clamp(44px,6vw,72px);box-shadow:inset 0 -10px 0 rgba(0,0,0,.18)}
+.p1 .block{height:210px;background:var(--yellow);color:#2b1d00}.p2 .block{height:150px;background:#d3d8ea;color:var(--ink)}.p3 .block{height:105px;background:#d58a4a;color:#fff}
+.suspense{visibility:hidden}
+@media(max-width:700px){.modes{grid-template-columns:minmax(0,1fr)}.p1 .block{height:150px}.p2 .block{height:110px}.p3 .block{height:80px}}
 .overlay{position:fixed;inset:0;background:rgba(5,8,20,.8);display:grid;place-items:center;padding:16px;z-index:10;color:var(--ink);text-align:center}
 .overlay[hidden]{display:none}
 #aqr img,#aqr canvas{width:min(240px,60vw)!important;height:auto!important}
@@ -169,6 +183,15 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
     <button class="btn ghost" id="b-local">Tester sur cet ordi</button>
   </div>
   <p class="small" id="qcount"></p>
+</section>
+
+<section class="screen" id="s-mode" hidden>
+  <h2>Choisis le mode de jeu</h2>
+  <div class="modes">
+    <button class="mode-card nul" data-mode="nul"><span class="em">🎓</span><b>Qui sera le plus nul ?</b><span>Bien répondre fait sortir de la classe. Le dernier qui reste est sacré le plus nul !</span></button>
+    <button class="mode-card cl" data-mode="classic"><span class="em">🏆</span><b>Classement classique</b><span>Tout le monde joue jusqu'au bout. Celui qui a le plus de bonnes réponses gagne.</span></button>
+  </div>
+  <button class="btn ghost" id="mode-back">Retour</button>
 </section>
 
 <section class="screen" id="s-edit" hidden style="justify-content:flex-start">
@@ -211,6 +234,7 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   <div class="title-block"><h2>Emploi du temps</h2><span class="chalk" style="font-size:30px" id="m-sub"></span></div>
   <div class="board"><div class="subjects" id="m-tiles"></div></div>
   <div class="classbar" id="m-class"></div>
+  <button class="btn gold" id="m-podium" hidden>🏆 Terminer : podium final</button>
 </section>
 
 <section class="screen" id="s-intro" hidden>
@@ -228,6 +252,13 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   <div class="row"><button class="btn alt" id="q-replay" hidden>▶ Rejouer la musique</button><button class="btn alt" id="q-skip">Arrêter le chrono</button><button class="btn gold" id="q-next" hidden>Suivant</button></div>
 </section>
 
+<section class="screen" id="s-pod" hidden>
+  <h1 style="color:var(--yellow)">Le podium !</h1>
+  <div class="podium suspense" id="pod"></div>
+  <div class="dipl suspense" id="pod-rest"></div>
+  <div class="row"><button class="btn gold" id="pod-again">Nouvelle partie</button><button class="btn ghost" id="pod-home">Accueil</button></div>
+</section>
+
 <section class="screen" id="s-bul" hidden>
   <div class="bul" id="bul"></div>
   <button class="btn gold" id="bul-next">Retour à l'emploi du temps</button>
@@ -235,8 +266,8 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 
 <section class="screen" id="s-end" hidden>
   <p class="chalk" style="font-size:38px;margin:0" id="e-pre">Et le plus nul est…</p>
-  <div class="losers" id="e-losers"></div>
-  <p class="sub" id="e-sub"></p>
+  <div class="losers suspense" id="e-losers"></div>
+  <p class="sub suspense" id="e-sub"></p>
   <h2 style="font-size:28px;margin-top:10px">Les diplômés, dans l'ordre de sortie</h2>
   <div class="dipl" id="e-dipl"></div>
   <div class="row"><button class="btn gold" id="end-again">Nouvelle rentrée</button><button class="btn ghost" id="end-home">Accueil</button></div>
@@ -307,6 +338,14 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   </div>
 </div>
 
+<div class="overlay" id="rank-ov" hidden>
+  <div class="bul" style="max-height:88vh;overflow:auto;transform:none">
+    <h2 id="rk-title">Classement</h2>
+    <div id="rk-list"></div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="rk-close">Fermer</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="ex-ov" hidden>
   <div class="card" style="display:flex;flex-direction:column;gap:12px;width:min(100%,720px)">
     <h2 style="color:var(--ink)" id="ex-title">Mes questions</h2>
@@ -329,11 +368,12 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   <div class="a-themes" id="a-themes" hidden></div>
   <button class="btn gold" id="a-next" style="width:min(100%,460px);min-height:84px;font-size:24px" disabled>…</button>
   <button class="btn alt" id="a-replay" hidden>▶ Rejouer la musique</button>
+  <button class="btn alt" id="a-rank" hidden>🏆 Afficher le classement</button>
   <button class="btn alt" id="a-skip" hidden>Arrêter le chrono</button>
   <p class="err" id="a-err" style="color:#fff"></p>
 </section>
 
-<button class="btn alt fs" id="b-fs" hidden>Plein écran</button>
+<div class="topbar" id="topbar" hidden><button class="btn gold" id="b-rank">🏆 Classement</button><button class="btn alt" id="b-snd">🔊 Sons</button><button class="btn alt" id="b-fs">Plein écran</button></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -597,6 +637,33 @@ function playerNet(code, local, h){
   return { send:m => cl.publish(base + 'host', JSON.stringify({from:pid, m}), {qos:1}), stop:() => { try { cl.end(true); } catch(e){} } };
 }
 
+/* ---------- Sons de jeu télé (synthétisés, rien à télécharger) ---------- */
+const SFX = {
+  ctx:null, on:true,
+  init(){ if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} } if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
+  tone(f, d, o = {}){ const c = this.ctx; if (!c || !this.on) return; const {type = 'sine', v = .18, at = 0, slide = 0} = o;
+    const t = c.currentTime + at, os = c.createOscillator(), g = c.createGain(); os.type = type; os.frequency.setValueAtTime(f, t);
+    if (slide) os.frequency.exponentialRampToValueAtTime(slide, t + d);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    os.connect(g).connect(c.destination); os.start(t); os.stop(t + d + .05); },
+  noise(d, o = {}){ const c = this.ctx; if (!c || !this.on) return; const {v = .2, at = 0, hp = 800} = o;
+    const b = c.createBuffer(1, Math.max(1, c.sampleRate * d | 0), c.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+    const sr = c.createBufferSource(); sr.buffer = b; const fl = c.createBiquadFilter(); fl.type = 'highpass'; fl.frequency.value = hp;
+    const g = c.createGain(), t = c.currentTime + at; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    sr.connect(fl).connect(g).connect(c.destination); sr.start(t); },
+  join(){ this.tone(880, .12, {type:'triangle'}); this.tone(1320, .16, {type:'triangle', at:.08}); },
+  bell(){ for (let i = 0; i < 14; i++) this.tone(i % 2 ? 1480 : 1320, .08, {type:'square', v:.06, at:i * .08}); },
+  jingle(){ [523, 659, 784, 1047].forEach((f, i) => this.tone(f, .22, {type:'triangle', at:i * .12, v:.2})); this.tone(1568, .6, {type:'triangle', at:.5, v:.16}); this.noise(.4, {at:.5, v:.08, hp:5000}); },
+  tick(){ this.tone(1050, .05, {type:'square', v:.07}); },
+  good(){ [784, 988, 1319].forEach((f, i) => this.tone(f, .32, {type:'triangle', at:i * .09, v:.2})); },
+  buzz(){ this.tone(150, .7, {type:'sawtooth', v:.13}); this.tone(112, .7, {type:'sawtooth', v:.11}); },
+  whoosh(){ this.tone(300, .45, {slide:1400, v:.16}); this.noise(.35, {v:.06, hp:2500}); },
+  drum(dur = 2.4){ for (let t = 0; t < dur; t += .055) this.noise(.05, {at:t, v:.04 + .14 * (t / dur), hp:150}); this.noise(.5, {at:dur, v:.3, hp:3000}); },
+  fanfare(at = 0){ [[523,0],[523,.15],[523,.3],[659,.45],[784,.75],[659,1],[784,1.15],[1047,1.4]].forEach(([f, a]) => { this.tone(f, .35, {type:'sawtooth', v:.07, at:at + a}); this.tone(f / 2, .35, {type:'triangle', v:.1, at:at + a}); }); },
+  sad(){ [392, 370, 349, 311].forEach((f, i) => this.tone(f, i === 3 ? 1.1 : .45, {type:'triangle', at:i * .45, v:.2})); }
+};
+$('#b-snd').onclick = () => { SFX.on = !SFX.on; $('#b-snd').textContent = SFX.on ? '🔊 Sons' : '🔇 Muet'; };
+
 /* ==================== ANIMATEUR ==================== */
 let H = null;
 const active = () => [...H.players.values()].filter(p => p.on);
@@ -605,12 +672,17 @@ const participants = () => active().filter(p => p.inClass);
 const curQ = () => H.qs[H.qi];
 const isFinal = () => H.manche && H.manche.final;
 const playable = () => THEMES.filter(t => !t.final && validQs(t).length);
+const classic = () => H && H.mode === 'classic';
+const tname = t => t.final ? (classic() ? 'Questions éclair' : 'Finale') : t.name;
+const ranking = () => [...H.players.values()].sort((a, b) => (b.good || 0) - (a.good || 0) || (a.time || 0) - (b.time || 0));
+const rankOf = p => ranking().indexOf(p) + 1;
 
-function startHost(local){
+function startHost(local, mode){
+  SFX.init();
   const code = String(1000 + Math.floor(Math.random() * 9000));
   H = {code, local, players:new Map(), pid2key:new Map(), phase:'lobby', manche:null, qs:[], qi:-1, start:0, limit:0, tick:null,
-       counts:[0,0,0,0], pin:rid(), admins:new Set(), done:new Set(), exits:[], lastOut:[], losers:[]};
-  show('s-lobby'); $('#b-fs').hidden = false;
+       counts:[0,0,0,0], pin:rid(), admins:new Set(), done:new Set(), exits:[], lastOut:[], losers:[], mode:mode === 'classic' ? 'classic' : 'nul'};
+  show('s-lobby'); $('#topbar').hidden = false; $('#rank-ov').hidden = true;
   $('#l-code').textContent = code; $('#l-status').textContent = 'Connexion au serveur…';
   $('#l-players').innerHTML = ''; $('#l-start').disabled = true; $('#l-title').textContent = 'La classe attend ses élèves…';
   const base = location.origin + location.pathname;
@@ -636,9 +708,9 @@ function onHostMsg(pid, m){
     let name = String(m.name || '').replace(/\s+/g, ' ').trim().slice(0, 16) || 'Élève';
     let key = name.toLowerCase(), p = H.players.get(key);
     if (p && p.on && p.pid !== pid) { let n = 2; while (H.players.has((name + ' ' + n).toLowerCase())) n++; name += ' ' + n; key = name.toLowerCase(); p = null; }
-    if (!p) { p = {name, key, ans:{}, notes:{}, inClass:!isFinal() || H.phase === 'lobby', out:null}; H.players.set(key, p); }
+    if (!p) { p = {name, key, ans:{}, notes:{}, inClass:classic() || !isFinal() || H.phase === 'lobby', out:null, good:0, time:0}; H.players.set(key, p); if (H.phase === 'lobby') SFX.join(); }
     p.pid = pid; p.on = true; p.av = cleanAv(m.av); H.pid2key.set(pid, key);
-    H.net.send(pid, {t:'welcome', name:p.name, started:H.phase !== 'lobby', inClass:p.inClass});
+    H.net.send(pid, {t:'welcome', name:p.name, started:H.phase !== 'lobby', inClass:p.inClass, classic:classic()});
     if (H.phase === 'question' && !p.ans[qkey()]) sendQ(p);
     renderLobby(); renderCount(); renderClassBar();
   } else if (m.t === 'answer') {
@@ -657,6 +729,8 @@ function onHostMsg(pid, m){
     if (m.c === 'next') hostNext();
     else if (m.c === 'skip' && H.phase === 'question') reveal();
     else if (m.c === 'replay') hostReplay();
+    else if (m.c === 'rank') toggleRank();
+    else if (m.c === 'podium' && classic() && H.phase === 'menu') podium();
     else if (m.c === 'theme' && H.phase === 'menu') startManche(String(m.id));
     pushAdmin();
   }
@@ -685,13 +759,14 @@ function renderLobby(){
 function renderClassBar(){
   if (!H || H.phase !== 'menu') return;
   const c = inClass();
+  if (classic()) { const r = ranking(); $('#m-sub').textContent = r[0] && r[0].good ? `En tête : ${r[0].name} avec ${r[0].good} bonne${r[0].good > 1 ? 's' : ''} réponse${r[0].good > 1 ? 's' : ''}` : 'Choisis la première matière !'; $('#m-class').innerHTML = ''; return; }
   $('#m-sub').textContent = c.length ? `Encore ${c.length} élève${c.length > 1 ? 's' : ''} en classe` : 'Tout le monde est sorti !';
   $('#m-class').innerHTML = c.map(p => `<span class="chip old ${p.on ? '' : 'off'}"><span class="av-s">${judoka(p.av)}</span>${esc(p.name)}</span>`).join('');
 }
 function renderCount(){
   if (!H || H.phase !== 'question') return;
   const ps = participants(), n = ps.filter(p => p.ans[qkey()]).length;
-  $('#q-count').textContent = `${n}/${ps.length} en classe ont répondu`;
+  $('#q-count').textContent = `${n}/${ps.length} ${classic() ? '' : 'en classe '}ont répondu`;
   pushAdmin();
 }
 
@@ -702,9 +777,9 @@ function showMenu(){
     const n = validQs(t).length, done = H.done.has(t.id);
     const dis = !n || (t.final && c < 1);
     return `<button class="tile-t ${t.final ? 'final' : ''} ${done ? 'done' : ''}" style="${t.final ? '' : 'background:' + t.color}" data-theme="${t.id}" ${dis ? 'disabled' : ''}>
-      ${done ? '<span class="stamp">Fait ✓</span>' : ''}<span class="em">${t.emoji}</span><b>${esc(t.name)}</b><span>${n ? n + ' questions' : 'À remplir'}</span></button>`;
+      ${done ? '<span class="stamp">Fait ✓</span>' : ''}<span class="em">${t.emoji}</span><b>${esc(t.final && classic() ? 'Questions éclair' : t.name)}</b><span>${n ? n + ' questions' : 'À remplir'}</span></button>`;
   }).join('');
-  show('s-menu'); renderClassBar();
+  show('s-menu'); renderClassBar(); $('#m-podium').hidden = !classic();
   H.players.forEach(p => p.on && H.net.send(p.pid, {t:'menu', inClass:p.inClass}));
   pushAdmin();
 }
@@ -716,19 +791,20 @@ function startManche(id){
   if (t.final && !inClass().length) return;
   H.manche = t; H.qs = qs; H.qi = -1; H.done.add(id); H.phase = 'intro';
   H.players.forEach(p => { p.notes[t.id] = {ok:0, el:0}; });
-  $('#i-em').textContent = t.emoji; $('#i-name').textContent = t.final ? 'Qui sera le plus nul ?' : 'Contrôle de ' + t.name;
+  SFX.jingle();
+  $('#i-em').textContent = t.emoji; $('#i-name').textContent = t.final ? (classic() ? 'Questions éclair' : 'Qui sera le plus nul ?') : 'Contrôle de ' + t.name;
   $('#i-name').style.color = t.color;
-  $('#i-rule').textContent = t.final
+  $('#i-rule').textContent = classic() ? `${qs.length} questions. Chaque bonne réponse rapporte un point au classement. Réponds vite pour départager les égalités !` : t.final
     ? `Grande finale ! À chaque question, ceux qui répondent juste sortent de la classe. Le dernier qui reste sera sacré le plus nul !`
     : `${qs.length} questions. À la fin du contrôle, les meilleures notes sortent de la classe. Les élèves déjà sortis peuvent jouer pour le fun.`;
   show('s-intro');
-  H.players.forEach(p => p.on && H.net.send(p.pid, {t:'intro', name:t.final ? 'Grande finale' : t.name, emoji:t.emoji, color:t.color, final:!!t.final, inClass:p.inClass}));
+  H.players.forEach(p => p.on && H.net.send(p.pid, {t:'intro', classic:classic(), name:t.final ? (classic() ? 'Questions éclair' : 'Grande finale') : t.name, emoji:t.emoji, color:t.color, final:!!t.final, inClass:p.inClass}));
   pushAdmin();
 }
 function sendQ(p){
   const q = curQ(), t = H.manche;
   H.net.send(p.pid, {t:'q', i:H.qi, n:H.qs.length, q:q.q, a:q.a.map(x => x.trim()), ms:Math.max(0, H.limit - (Date.now() - H.start)),
-    theme:t.final ? 'Finale' : t.name, color:t.color, inClass:p.inClass});
+    theme:tname(t), color:t.color, inClass:p.inClass});
 }
 function startQuestion(i){
   H.qi = i; H.phase = 'question'; H.counts = [0,0,0,0]; $('#admin-ov').hidden = true; stopClip();
@@ -736,7 +812,7 @@ function startQuestion(i){
   $('#q-replay').hidden = !q.audio; $('#q-replay').textContent = '▶ Rejouer la musique';
   if (q.audio) { H.limit += Math.max(0, (q.audio.e || 0) - (q.audio.s || 0)) * 1000;
     playClip(q.audio).then(ok => { if (!ok) $('#q-replay').textContent = 'Musique introuvable sur cet ordi'; }); }
-  $('#q-tag').textContent = `${t.emoji} ${t.final ? 'Finale' : t.name} · ${i + 1}/${H.qs.length}`; $('#q-tag').style.background = t.color;
+  $('#q-tag').textContent = `${t.emoji} ${tname(t)} · ${i + 1}/${H.qs.length}`; $('#rank-ov').hidden = true; H.lastLeft = null; $('#q-tag').style.background = t.color;
   $('#q-tag').style.color = t.final ? '#2b1d00' : '#fff';
   $('#q-text').textContent = q.q;
   $('#q-tiles').innerHTML = q.a.map((a, j) => a.trim() ? `<div class="tile c${j}" data-j="${j}">${shape(j)}<span>${esc(a)}</span><span class="n" hidden>0</span></div>` : '').join('');
@@ -745,6 +821,7 @@ function startQuestion(i){
   active().forEach(sendQ);
   clearInterval(H.tick);
   const tick = () => { const left = Math.max(0, Math.ceil((H.limit - (Date.now() - H.start)) / 1000));
+    if (left !== H.lastLeft && left > 0 && left <= 5 && (!curClip || player.paused)) SFX.tick(); H.lastLeft = left;
     $('#q-timer').textContent = left; $('#q-timer').classList.toggle('low', left <= 5); if (left <= 0) reveal(); };
   tick(); H.tick = setInterval(tick, 200);
 }
@@ -756,13 +833,16 @@ function reveal(){
     el.classList.toggle('good', j === q.c); el.classList.toggle('dim', j !== q.c);
     const n = el.querySelector('.n'); n.hidden = false; n.textContent = H.counts[j]; });
   // notes du contrôle
-  H.players.forEach(p => { const a = p.ans[k]; if (a && a.counted && a.ok) { noteOf(p, t.id).ok++; noteOf(p, t.id).el += a.el; } });
+  H.players.forEach(p => { const a = p.ans[k]; if (a && a.counted && a.ok) { noteOf(p, t.id).ok++; noteOf(p, t.id).el += a.el; }
+    if (a && a.ok) { p.good = (p.good || 0) + 1; p.time = (p.time || 0) + a.el; } });
+  const anyGood = participants().some(p => p.ans[k] && p.ans[k].ok);
+  anyGood ? SFX.good() : SFX.buzz();
   let exited = [];
-  if (t.final) {
+  if (t.final && !classic()) {
     const cls = inClass();
     exited = cls.filter(p => p.ans[k] && p.ans[k].ok).sort((a, b) => a.ans[k].el - b.ans[k].el);
     if (exited.length && exited.length === cls.length) exited.pop();   // le plus lent reste en classe
-    exited.forEach(p => graduate(p, 'Finale'));
+    exited.forEach(p => graduate(p, 'Finale')); if (exited.length) setTimeout(() => SFX.whoosh(), 450);
     const left = inClass();
     $('#q-exit').hidden = false;
     $('#q-exit').innerHTML = (exited.length
@@ -774,8 +854,10 @@ function reveal(){
   }
   $('#q-skip').hidden = true; $('#q-next').hidden = false;
   if (q.audio) $('#q-replay').textContent = '▶ Écouter la suite';
+  const rk = ranking(), nP = rk.length;
+  if (!$('#rank-ov').hidden) renderRank();
   H.players.forEach(p => { if (!p.on) return; const a = p.ans[k];
-    H.net.send(p.pid, {t:'res', ok:!!(a && a.ok), none:!a, good, counted:!!(a && a.counted), final:!!t.final,
+    H.net.send(p.pid, {t:'res', ok:!!(a && a.ok), none:!a, good, counted:!!(a && a.counted), final:!!t.final && !classic(), classic:classic(), score:p.good || 0, rank:rk.indexOf(p) + 1, n:nP,
       exited:exited.includes(p), inClass:p.inClass, note:t.final ? null : `${noteOf(p, t.id).ok}/${H.qi + 1}`}); });
   pushAdmin();
 }
@@ -784,17 +866,17 @@ function graduate(p, where){ p.inClass = false; p.out = {rank:H.exits.length + 1
 function bulletin(){
   stopClip(); H.phase = 'bulletin';
   const t = H.manche, cls = inClass(), remaining = playable().filter(x => !H.done.has(x.id)).length;
-  const k = Math.max(0, Math.ceil((cls.length - 3) / (remaining + 1)));
+  const k = classic() ? 0 : Math.max(0, Math.ceil((cls.length - 3) / (remaining + 1)));
   const ranked = cls.slice().sort((a, b) => noteOf(b, t.id).ok - noteOf(a, t.id).ok || noteOf(a, t.id).el - noteOf(b, t.id).el);
   const out = ranked.filter(p => noteOf(p, t.id).ok > 0).slice(0, k);
-  out.forEach(p => graduate(p, t.name));
+  out.forEach(p => graduate(p, t.name)); if (out.length) setTimeout(() => SFX.whoosh(), 300); else SFX.good();
   const n = H.qs.length;
   $('#bul').innerHTML = `<h2>Bulletin · ${t.emoji} ${esc(t.name)}</h2>
-    <p class="chalk" style="font-size:26px;margin:4px 0 10px;color:#1d3a32">${out.length ? `${out.length} meilleure${out.length > 1 ? 's' : ''} note${out.length > 1 ? 's' : ''} sort${out.length > 1 ? 'ent' : ''} de la classe !` : 'Personne ne sort de la classe cette fois…'}</p>
+    <p class="chalk" style="font-size:26px;margin:4px 0 10px;color:#1d3a32">${classic() ? 'Fin du contrôle : voici les notes !' : out.length ? `${out.length} meilleure${out.length > 1 ? 's' : ''} note${out.length > 1 ? 's' : ''} sort${out.length > 1 ? 'ent' : ''} de la classe !` : 'Personne ne sort de la classe cette fois…'}</p>
     ${ranked.map(p => `<div class="brow"><span class="av-m">${judoka(p.av, out.includes(p) ? 'grad' : null)}</span><span class="nm">${esc(p.name)}</span>
-      <span class="note">${noteOf(p, t.id).ok}/${n}</span><span class="st ${out.includes(p) ? 'go' : ''}">${out.includes(p) ? 'Sort de la classe 🎓' : 'Reste en classe'}</span></div>`).join('') || '<p>Personne en classe.</p>'}`;
+      <span class="note">${noteOf(p, t.id).ok}/${n}</span><span class="st ${out.includes(p) ? 'go' : ''}">${classic() ? `${p.good || 0} au total · ${rankOf(p)}e` : out.includes(p) ? 'Sort de la classe 🎓' : 'Reste en classe'}</span></div>`).join('') || '<p>Personne en classe.</p>'}`;
   show('s-bul');
-  H.players.forEach(p => p.on && H.net.send(p.pid, {t:'bulletin', name:t.name, note:p.notes[t.id] ? `${p.notes[t.id].ok}/${n}` : '', exited:out.includes(p), inClass:p.inClass, wasOut:!out.includes(p) && !p.inClass}));
+  H.players.forEach(p => p.on && H.net.send(p.pid, {t:'bulletin', classic:classic(), rank:rankOf(p), score:p.good || 0, name:t.name, note:p.notes[t.id] ? `${p.notes[t.id].ok}/${n}` : '', exited:out.includes(p), inClass:p.inClass, wasOut:!out.includes(p) && !p.inClass}));
   pushAdmin();
 }
 function finale(){
@@ -805,24 +887,47 @@ function finale(){
   $('#e-sub').textContent = losers.length ? 'Bravo pour ce magnifique titre que personne ne voulait !' : '';
   const dip = H.exits.map(k => H.players.get(k)).filter(Boolean);
   $('#e-dipl').innerHTML = dip.map(p => `<span class="dchip"><span class="rk">${p.out.rank}</span><span class="av-m">${judoka(p.av, 'grad')}</span>${esc(p.name)}${p.out.rank === 1 ? ' · Premier de la classe' : ''}</span>`).join('');
-  show('s-end');
+  $('#e-losers').classList.add('suspense'); $('#e-sub').classList.add('suspense');
+  show('s-end'); SFX.drum(2.4);
+  setTimeout(() => { $('#e-losers').classList.remove('suspense'); $('#e-sub').classList.remove('suspense'); SFX.sad(); SFX.fanfare(2); }, 2500);
   H.players.forEach(p => p.on && H.net.send(p.pid, {t:'end', nul:losers.includes(p), rank:p.out ? p.out.rank : null, where:p.out ? p.out.where : null, n:dip.length}));
   pushAdmin();
 }
+function podium(){
+  stopClip(); H.phase = 'end'; clearInterval(H.tick); $('#rank-ov').hidden = true;
+  const r = ranking(), lbl = p => `${p.good || 0} bonne${(p.good || 0) > 1 ? 's' : ''} réponse${(p.good || 0) > 1 ? 's' : ''}`;
+  $('#pod').innerHTML = [1, 0, 2].map(k => r[k] ? `<div class="step p${k + 1}"><span class="av-p">${judoka(r[k].av, k === 0 ? 'grad' : null)}</span><b>${esc(r[k].name)}</b><span class="pill">${lbl(r[k])}</span><div class="block">${k + 1}</div></div>` : '<div class="step"></div>').join('');
+  $('#pod-rest').innerHTML = r.slice(3).map((p, i) => `<span class="dchip"><span class="rk">${i + 4}</span><span class="av-m">${judoka(p.av)}</span>${esc(p.name)} · ${p.good || 0}</span>`).join('');
+  $('#pod').classList.add('suspense'); $('#pod-rest').classList.add('suspense');
+  show('s-pod'); SFX.drum(2.2);
+  setTimeout(() => { $('#pod').classList.remove('suspense'); $('#pod-rest').classList.remove('suspense'); SFX.fanfare(); }, 2300);
+  H.players.forEach(p => p.on && H.net.send(p.pid, {t:'end', classic:true, rank:r.indexOf(p) + 1, n:r.length, score:p.good || 0}));
+  pushAdmin();
+}
+function renderRank(){
+  const r = ranking(), cl = classic();
+  $('#rk-title').textContent = cl ? 'Classement' : 'Classement des bonnes réponses';
+  $('#rk-list').innerHTML = r.map((p, i) => `<div class="brow"><span class="rk-n">${i + 1}</span><span class="av-m">${judoka(p.av, !cl && p.out ? 'grad' : null)}</span><span class="nm">${esc(p.name)}</span>
+    <span class="note">${p.good || 0} ✓</span>${cl ? '' : `<span class="st ${p.inClass ? '' : 'go'}">${p.inClass ? 'En classe' : 'Diplômé·e #' + p.out.rank}</span>`}</div>`).join('') || '<p>Pas encore d\'élèves.</p>';
+}
+function toggleRank(force){
+  if (!H) return; const ov = $('#rank-ov'), open = force !== undefined ? force : ov.hidden;
+  if (open) renderRank(); ov.hidden = !open; pushAdmin();
+}
 function again(){
   H.done = new Set(); H.exits = []; H.manche = null; H.qi = -1; H.phase = 'lobby';
-  for (const [k, p] of H.players) { if (!p.on) H.players.delete(k); else { p.ans = {}; p.notes = {}; p.inClass = true; p.out = null; } }
+  for (const [k, p] of H.players) { if (!p.on) H.players.delete(k); else { p.ans = {}; p.notes = {}; p.inClass = true; p.out = null; p.good = 0; p.time = 0; } }
   H.players.forEach(p => H.net.send(p.pid, {t:'lobby'}));
   show('s-lobby'); renderLobby();
 }
 function hostNext(){
   if (!H) return;
   const ph = H.phase;
-  if (ph === 'lobby') { if (active().length) showMenu(); }
+  if (ph === 'lobby') { if (active().length) { SFX.bell(); showMenu(); } }
   else if (ph === 'intro') startQuestion(0);
   else if (ph === 'question') reveal();
   else if (ph === 'reveal') {
-    if (isFinal()) (inClass().length <= 1 || H.qi + 1 >= H.qs.length) ? finale() : startQuestion(H.qi + 1);
+    if (isFinal() && !classic()) (inClass().length <= 1 || H.qi + 1 >= H.qs.length) ? finale() : startQuestion(H.qi + 1);
     else H.qi + 1 < H.qs.length ? startQuestion(H.qi + 1) : bulletin();
   }
   else if (ph === 'bulletin') showMenu();
@@ -837,7 +942,7 @@ const nextLabel = () => {
   if (ph === 'question') return 'Montrer la réponse';
   if (ph === 'reveal') return $('#q-next').textContent;
   if (ph === 'bulletin') return "Retour à l'emploi du temps";
-  if (ph === 'end') return 'Nouvelle rentrée';
+  if (ph === 'end') return classic() ? 'Nouvelle partie' : 'Nouvelle rentrée';
   return 'Suivant';
 };
 function pushAdmin(){
@@ -846,16 +951,19 @@ function pushAdmin(){
   const st = {t:'astate', phase:H.phase, label:nextLabel(), players:active().length, inClass:inClass().length,
     title:H.manche ? (H.manche.final ? 'Grande finale' : H.manche.name) : '', qi:H.qi, n:H.qs.length,
     q:q ? q.q : '', good:q ? q.a[q.c].trim() : '', audio:!!(q && q.audio), answered:q ? ps.filter(p => p.ans[qkey()]).length : 0, part:ps.length,
-    canNext:H.phase !== 'lobby' || active().length > 0,
-    themes:THEMES.map(t => ({id:t.id, name:t.final ? 'Finale' : t.name, emoji:t.emoji, color:t.color, n:validQs(t).length, done:H.done.has(t.id), final:!!t.final}))};
+    canNext:H.phase !== 'lobby' || active().length > 0, mode:H.mode, rankOpen:!$('#rank-ov').hidden,
+    themes:THEMES.map(t => ({id:t.id, name:tname(t), emoji:t.emoji, color:t.color, n:validQs(t).length, done:H.done.has(t.id), final:!!t.final}))};
   H.admins.forEach(a => H.net.send(a, st));
 }
-$('#b-host').onclick = () => startHost(false);
-$('#b-local').onclick = () => startHost(true);
+let modeLocal = false;
+$('#b-host').onclick = () => { modeLocal = false; SFX.init(); show('s-mode'); };
+$('#b-local').onclick = () => { modeLocal = true; SFX.init(); show('s-mode'); };
+$('#mode-back').onclick = () => show('s-home');
+document.querySelectorAll('.mode-card').forEach(b => b.onclick = () => startHost(modeLocal, b.dataset.mode));
 $('#b-edit').onclick = () => { renderEditor(); show('s-edit'); };
 $('#b-iamplayer').onclick = () => playerJoin(params.get('local') === '1');
 $('#l-start').onclick = hostNext;
-$('#l-quit').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
+$('#l-quit').onclick = () => { H.net.stop(); H = null; $('#topbar').hidden = true; show('s-home'); };
 $('#i-go').onclick = hostNext;
 $('#q-skip').onclick = hostNext;
 function hostReplay(){
@@ -867,7 +975,11 @@ $('#q-replay').onclick = hostReplay;
 $('#q-next').onclick = hostNext;
 $('#bul-next').onclick = hostNext;
 $('#end-again').onclick = hostNext;
-$('#end-home').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
+$('#end-home').onclick = $('#pod-home').onclick = () => { H.net.stop(); H = null; $('#topbar').hidden = true; $('#rank-ov').hidden = true; show('s-home'); };
+$('#pod-again').onclick = hostNext;
+$('#m-podium').onclick = () => { if (H && classic() && H.phase === 'menu') podium(); };
+$('#b-rank').onclick = () => toggleRank();
+$('#rk-close').onclick = () => toggleRank(false);
 $('#l-admin').onclick = () => { $('#admin-ov').hidden = false; };
 $('#a-close').onclick = () => { $('#admin-ov').hidden = true; };
 $('#b-fs').onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch(e){} };
@@ -923,9 +1035,10 @@ $('#mk-opts').addEventListener('click', e => { const b = e.target.closest('butto
 $('#mk-rand').onclick = () => { P.av = randAv(); store.set('csahr-av', JSON.stringify(P.av)); renderMaker(); };
 function waitScreen(title, sub, inCls){
   if (inCls !== undefined) P.inClass = inCls;
-  $('#w-av').innerHTML = judoka(P.av, P.inClass ? null : 'grad');
-  $('#w-av').classList.toggle('hat', !P.inClass);
-  $('#w-status').textContent = P.inClass ? 'En classe' : 'Diplômé·e 🎓 (tu joues pour le fun)';
+  const out = !P.classic && !P.inClass;
+  $('#w-av').innerHTML = judoka(P.av, out ? 'grad' : null);
+  $('#w-av').classList.toggle('hat', out);
+  $('#w-status').textContent = P.classic ? 'En jeu' : P.inClass ? 'En classe' : 'Diplômé·e 🎓 (tu joues pour le fun)';
   $('#w-title').textContent = title; $('#w-sub').textContent = sub;
   show('p-wait');
 }
@@ -933,17 +1046,17 @@ let barRaf = 0;
 function onPlayerMsg(m){
   if (!m || typeof m !== 'object') return;
   if (m.t === 'welcome') {
-    P.joined = true; P.name = m.name; $('#p-go').disabled = false; clearTimeout(P.timer);
+    P.joined = true; P.name = m.name; P.classic = !!m.classic; $('#p-go').disabled = false; clearTimeout(P.timer);
     waitScreen(`Bienvenue ${m.name} !`, m.started ? 'Tu es en classe, la suite arrive…' : 'Regarde le grand écran, la rentrée va sonner…', m.inClass);
   } else if (m.t === 'menu') {
-    waitScreen(P.inClass ? 'Récré !' : 'Tu es sorti·e !', "L'animateur choisit la prochaine matière…", m.inClass);
+    waitScreen(P.classic || P.inClass ? 'Récré !' : 'Tu es sorti·e !', "L'animateur choisit la prochaine matière…", m.inClass);
   } else if (m.t === 'intro') {
     P.inClass = m.inClass;
-    waitScreen(`${m.emoji} ${m.name}`, m.final ? (m.inClass ? 'Réponds juste pour sortir… sinon tu seras peut-être le plus nul !' : 'Tu es diplômé·e : regarde qui sera le plus nul !') : 'Le contrôle va commencer. Concentre-toi !');
+    waitScreen(`${m.emoji} ${m.name}`, m.classic ? 'Chaque bonne réponse compte pour le classement !' : m.final ? (m.inClass ? 'Réponds juste pour sortir… sinon tu seras peut-être le plus nul !' : 'Tu es diplômé·e : regarde qui sera le plus nul !') : 'Le contrôle va commencer. Concentre-toi !');
   } else if (m.t === 'q') {
     P.answered = -1; P.qi = m.i; P.inClass = m.inClass;
     $('#pq-tag').textContent = `${m.theme} · ${m.i + 1}/${m.n}`; $('#pq-tag').style.background = m.color;
-    $('#pq-status').textContent = m.inClass ? `${P.name} · en classe` : `${P.name} · pour le fun 🎓`;
+    $('#pq-status').textContent = P.classic ? P.name : m.inClass ? `${P.name} · en classe` : `${P.name} · pour le fun 🎓`;
     $('#pq-text').textContent = m.q;
     const n = m.a.filter(Boolean).length;
     $('#pq-btns').className = 'pbtns' + (n <= 2 ? ' two' : '');
@@ -963,14 +1076,20 @@ function onPlayerMsg(m){
       s.classList.add(!m.counted && !m.none ? 'res-pub' : m.ok ? 'res-ok' : 'res-ko');
       $('#r-verdict').textContent = m.ok ? 'Bonne réponse !' : m.none ? 'Trop tard !' : 'Raté…';
       $('#r-sub').textContent = m.ok ? (m.final && m.inClass ? 'Mais tu étais le plus lent… tu restes en classe !' : 'Bravo !') : 'La bonne réponse : ' + m.good;
-      $('#r-pill').textContent = m.inClass ? (m.note ? 'Note : ' + m.note : 'Toujours en classe…') : 'Diplômé·e · pour le fun';
+      $('#r-pill').textContent = m.classic ? `${m.score} bonne${m.score > 1 ? 's' : ''} réponse${m.score > 1 ? 's' : ''} · ${m.rank === 1 ? '1er' : m.rank + 'e'} sur ${m.n}` : m.inClass ? (m.note ? 'Note : ' + m.note : 'Toujours en classe…') : 'Diplômé·e · pour le fun';
     }
     show('p-res');
   } else if (m.t === 'bulletin') {
     P.inClass = m.inClass;
-    if (m.exited) waitScreen('Tu sors de la classe !', `Super note en ${m.name} : ${m.note}. Tu es diplômé·e 🎓`);
+    if (m.classic) waitScreen('Fin du contrôle', `Ta note en ${m.name} : ${m.note}. Tu es ${m.rank === 1 ? '1er' : m.rank + 'e'} au classement !`);
+    else if (m.exited) waitScreen('Tu sors de la classe !', `Super note en ${m.name} : ${m.note}. Tu es diplômé·e 🎓`);
     else if (m.wasOut) waitScreen('Bulletin', `Ta note pour le fun : ${m.note}`);
     else waitScreen('Tu restes en classe…', `Ta note en ${m.name} : ${m.note}. Il faudra faire mieux !`);
+  } else if (m.t === 'end' && m.classic) {
+    $('#pe-av').innerHTML = judoka(P.av, m.rank === 1 ? 'grad' : null);
+    $('#pe-title').textContent = m.rank === 1 ? 'Tu as gagné ! 🏆' : m.rank <= 3 ? `Sur le podium : ${m.rank}e !` : `Tu finis ${m.rank}e sur ${m.n}`;
+    $('#pe-sub').textContent = `${m.score} bonne${m.score > 1 ? 's' : ''} réponse${m.score > 1 ? 's' : ''}. Bravo !`;
+    show('p-end');
   } else if (m.t === 'end') {
     $('#pe-av').innerHTML = judoka(P.av, m.nul ? 'dunce' : 'grad');
     $('#pe-title').textContent = m.nul ? 'Tu es LE PLUS NUL ! 🏆' : m.rank === 1 ? 'Premier de la classe !' : `Diplômé·e : ${m.rank}e sorti·e`;
@@ -1011,7 +1130,8 @@ function adminJoin(){
       $('#a-info').textContent = m.phase === 'question' ? `${m.answered}/${m.part} en classe ont répondu` : `${m.players} élève${m.players > 1 ? 's' : ''} connecté${m.players > 1 ? 's' : ''} · ${m.inClass} encore en classe`;
       const menu = m.phase === 'menu';
       $('#a-themes').hidden = !menu;
-      if (menu) $('#a-themes').innerHTML = m.themes.map(t => `<button class="tile-t ${t.final ? 'final' : ''} ${t.done ? 'done' : ''}" style="${t.final ? '' : 'background:' + t.color}" data-theme="${t.id}" ${!t.n || (t.final && !m.inClass) ? 'disabled' : ''}><span class="em">${t.emoji}</span><b>${esc(t.name)}</b></button>`).join('');
+      $('#a-rank').hidden = m.phase === 'lobby'; $('#a-rank').textContent = m.rankOpen ? '🏆 Cacher le classement' : '🏆 Afficher le classement';
+      if (menu) $('#a-themes').innerHTML = (m.mode === 'classic' ? '<button class="tile-t final" style="grid-column:span 2" data-theme="__podium"><span class="em">🏆</span><b>Terminer : podium final</b></button>' : '') + m.themes.map(t => `<button class="tile-t ${t.final ? 'final' : ''} ${t.done ? 'done' : ''}" style="${t.final ? '' : 'background:' + t.color}" data-theme="${t.id}" ${!t.n || (t.final && !m.inClass) ? 'disabled' : ''}><span class="em">${t.emoji}</span><b>${esc(t.name)}</b></button>`).join('');
       $('#a-next').hidden = menu; $('#a-next').textContent = m.label; $('#a-next').disabled = !m.canNext;
       $('#a-skip').hidden = m.phase !== 'question';
       $('#a-replay').hidden = !m.audio; $('#a-replay').textContent = m.phase === 'reveal' ? '▶ Écouter la suite' : '▶ Rejouer la musique';
@@ -1021,7 +1141,9 @@ function adminJoin(){
 $('#a-next').onclick = () => { if (A && A.ok) { A.net.send({t:'cmd', c:'next'}); $('#a-next').disabled = true; } };
 $('#a-skip').onclick = () => { if (A && A.ok) A.net.send({t:'cmd', c:'skip'}); };
 $('#a-replay').onclick = () => { if (A && A.ok) A.net.send({t:'cmd', c:'replay'}); };
-$('#a-themes').addEventListener('click', e => { const b = e.target.closest('[data-theme]'); if (b && !b.disabled && A && A.ok) A.net.send({t:'cmd', c:'theme', id:b.dataset.theme}); });
+$('#a-themes').addEventListener('click', e => { const b = e.target.closest('[data-theme]'); if (!b || b.disabled || !A || !A.ok) return;
+  A.net.send(b.dataset.theme === '__podium' ? {t:'cmd', c:'podium'} : {t:'cmd', c:'theme', id:b.dataset.theme}); });
+$('#a-rank').onclick = () => { if (A && A.ok) A.net.send({t:'cmd', c:'rank'}); };
 
 /* ---------- Démarrage ---------- */
 updateCount();
