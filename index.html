@@ -425,83 +425,24 @@ function judoka(a, hat){
 const Q = (q, a, c, t = 20) => ({q, a, c, t});
 const DEFAULT_THEMES = [
   {id:'sport', name:'Sport', emoji:'⚽', color:'#14a05b', qs:[
-    Q("Quel pays a gagné la Coupe du monde de football 2026 ?", ["La France","L'Argentine","L'Espagne","Le Brésil"], 2),
-    Q("Avec 22 buts, quel Français est devenu le meilleur buteur de l'histoire de la Coupe du monde ?", ["Kylian Mbappé","Ousmane Dembélé","Antoine Griezmann","Olivier Giroud"], 0),
-    Q("Qui a gagné le Tour de France 2026, son 5e ?", ["Jonas Vingegaard","Tadej Pogačar","Remco Evenepoel","Paul Seixas"], 1),
-    Q("Qui a gagné le Ballon d'Or 2026 ?", ["Kylian Mbappé","Lamine Yamal","Harry Kane","Ousmane Dembélé"], 2),
-    Q("Combien de médailles la France a-t-elle gagnées aux JO d'hiver 2026, un record ?", ["8","15","23","40"], 2),
-    Q("Dans quel sport la France a-t-elle gagné le plus de médailles aux JO d'hiver 2026 ?", ["Le ski alpin","Le biathlon","Le patinage","Le bobsleigh"], 1),
-    Q("Combien de joueurs a une équipe de foot sur le terrain ?", ["9","10","11","12"], 2, 15),
-    Q("Sur quelle surface se joue le tournoi de Roland-Garros ?", ["Le gazon","La terre battue","Le béton","La moquette"], 1),
-    Q("Quelle équipe NBA a choisi Victor Wembanyama en 2023 ?", ["Les Lakers","Les Spurs de San Antonio","Les Bulls","Les Celtics"], 1),
-    Q("Dans quelle ville auront lieu les Jeux olympiques d'été 2028 ?", ["Los Angeles","Paris","Tokyo","Londres"], 0)
   ]},
   {id:'perso', name:'Personnalités', emoji:'🌟', color:'#ff4f9a', qs:[
-    Q("Quel YouTubeur organise la course de voitures GP Explorer ?", ["Squeezie","Inoxtag","Michou","Tibo InShape"], 0),
-    Q("Quel YouTubeur a gravi l'Everest pour son film « Kaizen » ?", ["Squeezie","Inoxtag","Amixem","Mister V"], 1),
-    Q("Qui est la première Française à être sortie dans l'espace ?", ["Claudie Haigneré","Sophie Adenot","Thomas Pesquet","Marie Curie"], 1),
-    Q("Qui présente « Qui sera le plus nul ? » sur TF1 ?", ["Cyril Hanouna","Camille Combal","Nikos Aliagas","Arthur"], 1),
-    Q("Qui a été sacrée la plus nulle de la saison 2 de « Qui sera le plus nul ? » ?", ["Nabilla","Chocoh","Mélanie Da Cruz","Blandine Lehout"], 1),
-    Q("Dans quel sport Léon Marchand est-il champion olympique ?", ["La natation","L'athlétisme","Le judo","Le cyclisme"], 0),
-    Q("Dans quel club joue Kylian Mbappé ?", ["Le PSG","Le Real Madrid","Le FC Barcelone","Monaco"], 1),
-    Q("Qui a écrit les livres Harry Potter ?", ["J.K. Rowling","Roald Dahl","J.R.R. Tolkien","Stephen King"], 0),
-    Q("Quel acteur joue Spider-Man aux côtés de Zendaya ?", ["Tobey Maguire","Tom Holland","Timothée Chalamet","Andrew Garfield"], 1)
   ]},
   {id:'musique', name:'Musique', emoji:'🎵', color:'#8b5cf6', qs:[
-    Q("Quel pays a gagné l'Eurovision 2026 ?", ["La France","La Bulgarie","Israël","La Finlande"], 1),
-    Q("Comment s'appelle la chanson gagnante de l'Eurovision 2026 ?", ["« Bangaranga »","« Regarde ! »","« Michelle »","« Wasted Love »"], 0),
-    Q("Qui a représenté la France à l'Eurovision 2026 ?", ["Louane","Monroe","Slimane","Aya Nakamura"], 1),
-    Q("Quelle chanteuse a chanté avec la Garde républicaine à l'ouverture des JO de Paris 2024 ?", ["Aya Nakamura","Angèle","Céline Dion","Lady Gaga"], 0),
-    Q("De quel pays vient le chanteur Stromae ?", ["La France","La Belgique","La Suisse","Le Canada"], 1),
-    Q("Quel chanteur est surnommé « le roi de la pop » ?", ["Elvis Presley","Michael Jackson","Freddie Mercury","Justin Bieber"], 1),
-    Q("Combien de cordes a une guitare classique ?", ["4","5","6","8"], 2, 15),
-    Q("Dans quelle ville le rappeur Orelsan a-t-il grandi ?", ["Marseille","Caen","Paris","Lyon"], 1),
-    Q("Quel instrument a des touches noires et blanches ?", ["Le violon","Le piano","La batterie","La flûte"], 1, 15)
   ]},
   {id:'actu', name:'Actualités', emoji:'📰', color:'#18a7f0', qs:[
-    Q("Quel judoka a annoncé le 9 novembre 2026 être candidat à l'élection présidentielle ?", ["Clarisse Agbégnénou","Teddy Riner","Joan-Benjamin Gaba","David Douillet"], 1),
-    Q("Combien de jours l'astronaute Sophie Adenot a-t-elle passés dans la Station spatiale internationale ?", ["35","135","235","535"], 2),
-    Q("Dans quels pays s'est jouée la Coupe du monde de foot 2026 ?", ["France, Espagne et Portugal","États-Unis, Canada et Mexique","Brésil et Argentine","Au Qatar"], 1),
-    Q("Combien d'équipes ont joué la Coupe du monde 2026, un record ?", ["24","32","48","64"], 2),
-    Q("Dans quel pays se sont déroulés les JO d'hiver 2026 ?", ["En France","En Italie","En Suisse","En Norvège"], 1),
-    Q("Dans quelle ville a eu lieu l'Eurovision 2026 ?", ["Vienne","Paris","Sofia","Stockholm"], 0),
-    Q("Dans quelle ville a eu lieu la cérémonie du Ballon d'Or 2026, pour la première fois ?", ["Paris","Londres","Madrid","Milan"], 1),
-    Q("Quel jeune Français de 19 ans a fini 4e du Tour de France 2026 ?", ["Paul Seixas","Julian Alaphilippe","Romain Bardet","Thibaut Pinot"], 0)
   ]},
   {id:'cg', name:'Culture G', emoji:'🧠', color:'#ff8a1c', qs:[
-    Q("Quelle est la capitale de l'Australie ?", ["Sydney","Melbourne","Canberra","Perth"], 2),
-    Q("Quelle est la plus grande planète du système solaire ?", ["La Terre","Jupiter","Saturne","Mars"], 1),
-    Q("Quel est le plus long fleuve de France ?", ["La Seine","La Loire","Le Rhône","La Garonne"], 1),
-    Q("Combien de pattes a une araignée ?", ["6","8","10","12"], 1, 15),
-    Q("Qui a écrit « Le Petit Prince » ?", ["Victor Hugo","Antoine de Saint-Exupéry","Jules Verne","Molière"], 1),
-    Q("Qui a peint La Joconde ?", ["Picasso","Léonard de Vinci","Van Gogh","Monet"], 1),
-    Q("Quel est le plus grand océan du monde ?", ["L'Atlantique","L'océan Indien","Le Pacifique","L'Arctique"], 2),
-    Q("En quelle année a eu lieu la prise de la Bastille ?", ["1492","1789","1815","1914"], 1),
-    Q("Quel est l'animal le plus rapide sur terre ?", ["Le lion","Le guépard","Le cheval","Le lévrier"], 1),
-    Q("Vrai ou faux : on voit la Grande Muraille de Chine à l'œil nu depuis la Lune.", ["Vrai","Faux","",""], 1, 15)
   ]},
   {id:'paroles', name:'On connaît les paroles', emoji:'🎤', color:'#e5383b', qs:[],
     hint:"Matière à remplir toi-même : écris un petit extrait de chanson avec un trou (ex. « … ___ … »), puis 4 propositions pour le mot manquant. Garde des extraits courts."},
   {id:'final', name:'La grande finale', emoji:'🎓', color:'#ffc21a', final:true,
     hint:"La finale : à chaque question, les élèves encore en classe qui répondent juste sortent. Le dernier qui reste est le plus nul.", qs:[
-    Q("Combien font 7 × 8 ?", ["54","56","58","64"], 1, 15),
-    Q("Combien de jours aura février en 2028 ?", ["28","29","30","31"], 1, 15),
-    Q("Quel est le pluriel de « cheval » ?", ["Des chevals","Des chevaux","Des chevales","Des chevaus"], 1, 15),
-    Q("Combien de minutes y a-t-il dans 2 heures ?", ["100","120","200","60"], 1, 15),
-    Q("Quelle est la capitale de l'Espagne ?", ["Barcelone","Madrid","Séville","Valence"], 1, 15),
-    Q("Bleu + jaune, ça donne…", ["Du vert","Du violet","De l'orange","Du marron"], 0, 15),
-    Q("Combien de lettres a l'alphabet ?", ["24","25","26","28"], 2, 15),
-    Q("Combien font 100 − 37 ?", ["63","73","67","53"], 0, 15),
-    Q("Quel est le contraire de « rapide » ?", ["Vite","Lent","Fort","Haut"], 1, 15),
-    Q("Qui a marché le premier sur la Lune ?", ["Neil Armstrong","Thomas Pesquet","Buzz l'Éclair","Youri Gagarine"], 0, 15),
-    Q("Quel est le féminin de « acteur » ?", ["Acteuse","Actrice","Acteure","Actrisse"], 1, 15),
-    Q("Quelle est la moitié de 50 ?", ["20","25","30","15"], 1, 15),
-    Q("Combien de faces a un dé classique ?", ["4","6","8","12"], 1, 15),
-    Q("Quel est le seul mammifère capable de vraiment voler ?", ["L'écureuil volant","La chauve-souris","Le pingouin","L'autruche"], 1, 15),
-    Q("Combien de côtés a un triangle ?", ["2","3","4","5"], 1, 15)
   ]}
 ];
-const KEY = 'csahr-plusnul-v1';
+const BASE_QS = {"sport": [{"q": "Quel pays a gagné la Coupe du monde de football 2026 ?", "a": ["La France", "L'Argentine", "L'Espagne", "Le Brésil"], "c": 2, "t": 20}, {"q": "Avec 22 buts, quel Français est devenu le meilleur buteur de l'histoire de la Coupe du monde ?", "a": ["Kylian Mbappé", "Ousmane Dembélé", "Antoine Griezmann", "Olivier Giroud"], "c": 0, "t": 20}, {"q": "Qui a gagné le Tour de France 2026, son 5e ?", "a": ["Jonas Vingegaard", "Tadej Pogačar", "Remco Evenepoel", "Oui Oui"], "c": 1, "t": 20}, {"q": "Qui a gagné le Ballon d'Or 2026 ?", "a": ["Kylian Mbappé", "Lamine Yamal", "Harry Kane", "Teddy Riner"], "c": 2, "t": 20}, {"q": "Est-ce que la ceinture noire est la plus haute ceinture que l'on peut obtenir au judo ?", "a": ["Oui", "Non", "", ""], "c": 1, "t": 20}, {"q": "Dans quel sport la France a-t-elle gagné le plus de médailles aux JO d'hiver 2026 ?", "a": ["Le ski alpin", "Le biathlon", "Le patinage", "Le bobsleigh"], "c": 1, "t": 20}, {"q": "Combien de joueurs a une équipe de foot sur le terrain ?", "a": ["9", "10", "11", "12"], "c": 2, "t": 15}, {"q": "Sur quelle surface se joue le tournoi de Roland-Garros ?", "a": ["Le gazon", "La terre battue", "Le béton", "La moquette"], "c": 1, "t": 20}, {"q": "Quelle équipe NBA a choisi Victor Wembanyama en 2023 ?", "a": ["Les Lakers", "Les Spurs de San Antonio", "Le CSAHR", "Les Celtics"], "c": 1, "t": 20}, {"q": "Quel Français est allé en 16es de finale à Roland-Garros en 2026 ?", "a": ["Teddy Riner", "Claude", "Moïse Kouamé", "Rafael Nadal"], "c": 2, "t": 20}, {"q": "Dans quelle catégorie de poids combat Teddy Riner ?", "a": ["-100 kg", "+120 kg", "+100 kg", "+91 kg"], "c": 2, "t": 20}], "perso": [{"q": "Quel YouTubeur organise la course de voitures GP Explorer ?", "a": ["Squeezie", "Inoxtag", "Michou", "Tibo InShape"], "c": 0, "t": 20}, {"q": "Quel YouTubeur a gravi l'Everest pour son film « Kaizen » ?", "a": ["Squeezie", "Inoxtag", "Amixem", "Mister V"], "c": 1, "t": 20}, {"q": "Qui est la première Française à être sortie dans l'espace ?", "a": ["Claudie Haigneré", "Sophie Adenot", "Thomas Pesquet", "Marie Curie"], "c": 1, "t": 20}, {"q": "Qui présente « Qui sera le plus nul ? » sur TF1 ?", "a": ["Cyril Aubourg", "Camille Combal", "Nikos Aliagas", "Arthur"], "c": 1, "t": 20}, {"q": "Dans quel sport Léon Marchand est-il champion olympique ?", "a": ["La natation", "L'athlétisme", "Le judo", "Le cyclisme"], "c": 0, "t": 20}, {"q": "Dans quel club joue Kylian Mbappé ?", "a": ["Le PSG", "Le Real Madrid", "Le FC Barcelone", "Monaco"], "c": 1, "t": 20}, {"q": "Qui a écrit les livres Harry Potter ?", "a": ["J.K. Rowling", "Roald Dahl", "J.R.R. Tolkien", "Stephen King"], "c": 0, "t": 20}, {"q": "Quel acteur joue Spider-Man aux côtés de Zendaya ?", "a": ["Tobey Maguire", "Tom Holland", "Timothée Chalamet", "Andrew Garfield"], "c": 1, "t": 20}], "musique": [{"q": "Quel pays a gagné l'Eurovision 2026 ?", "a": ["La France", "La Bulgarie", "Israël", "La Finlande"], "c": 1, "t": 20}, {"q": "Qui chante la chanson « Parisienne » ?", "a": ["Angèle", "Gims et La Mano", "M. Pokora", "Axelle Red"], "c": 1, "t": 20}, {"q": "Comment s'appelle l'hymne national de la France ?", "a": ["La Marseillaise", "La Brestoise", "La Parisienne", "La Kiffance"], "c": 0, "t": 20}, {"q": "Quelle chanteuse a chanté avec la Garde républicaine à l'ouverture des JO de Paris 2024 ?", "a": ["Aya Nakamura", "Angèle", "Céline Dion", "Lady Gaga"], "c": 0, "t": 20}, {"q": "De quel pays vient le chanteur Stromae ?", "a": ["La France", "La Belgique", "La Suisse", "Le Canada"], "c": 1, "t": 20}, {"q": "Quel chanteur est surnommé « le roi de la pop » ?", "a": ["Naps", "Michael Jackson", "Maitre Gims", "Justin Bieber"], "c": 1, "t": 20}, {"q": "Combien de cordes a une guitare classique ?", "a": ["4", "5", "6", "8"], "c": 2, "t": 15}, {"q": "Que chante Elsa dans le film La Reine des neiges ?", "a": ["Maté Délivrée", "Libérée Délivrée", "Piégée Délivrée", "Libérée Hadjimé"], "c": 1, "t": 20}, {"q": "Quel instrument a des touches noires et blanches ?", "a": ["Le violon", "Le piano", "La batterie", "La flûte"], "c": 1, "t": 15}], "actu": [{"q": "Quel judoka a annoncé le 9 novembre 2026 être candidat à l'élection présidentielle ?", "a": ["Clarisse Agbégnénou", "Teddy Riner", "Joan-Benjamin Gaba", "David Douillet"], "c": 1, "t": 20}, {"q": "Dans quels pays s'est jouée la Coupe du monde de foot 2026 ?", "a": ["France, Espagne et Portugal", "États-Unis, Canada et Mexique", "Brésil et Argentine", "Au Qatar"], "c": 1, "t": 20}, {"q": "Quel pays a remporté la finale par équipes mixtes de judo lors des Jeux olympiques de Paris 2024 ?", "a": ["France", "Chine", "Japon", "Suisse"], "c": 0, "t": 30}, {"q": "Dans quelle ville a eu lieu l'Eurovision 2026 ?", "a": ["Vienne", "Paris", "Sofia", "Stockholm"], "c": 0, "t": 20}, {"q": "Dans quelle ville a eu lieu la cérémonie du Ballon d'Or 2026, pour la première fois ?", "a": ["Paris", "Londres", "Madrid", "Milan"], "c": 1, "t": 20}, {"q": "Quel jeune Français de 19 ans a fini 4e du Tour de France 2026 ?", "a": ["Paul Seixas", "Julian Alaphilippe", "Romain Bardet", "Thibaut Pinot"], "c": 0, "t": 20}], "cg": [{"q": "Quelle est la capitale de l'Australie ?", "a": ["Sydney", "Melbourne", "Canberra", "Perth"], "c": 2, "t": 20}, {"q": "Quelle est la plus grande planète du système solaire ?", "a": ["La Terre", "Jupiter", "Saturne", "Mars"], "c": 1, "t": 20}, {"q": "Quel est le plus long fleuve de France ?", "a": ["La Seine", "La Loire", "Le Rhône", "La Garonne"], "c": 1, "t": 20}, {"q": "Combien de pattes a une araignée ?", "a": ["6", "8", "10", "12"], "c": 1, "t": 15}, {"q": "Qui a écrit « Le Petit Prince » ?", "a": ["Victor Hugo", "Antoine de Saint-Exupéry", "Jules Verne", "Molière"], "c": 1, "t": 20}, {"q": "Qui a peint La Joconde ?", "a": ["Picasso", "Léonard de Vinci", "Van Gogh", "Monet"], "c": 1, "t": 20}, {"q": "Quel est le plus grand océan du monde ?", "a": ["L'Atlantique", "L'océan Indien", "Le Pacifique", "L'Arctique"], "c": 2, "t": 20}, {"q": "En quelle année a eu lieu la prise de la Bastille ?", "a": ["1492", "1789", "1815", "1914"], "c": 1, "t": 20}, {"q": "Quel est l'animal le plus rapide sur terre ?", "a": ["Le lion", "Le guépard", "Le cheval", "Le lévrier"], "c": 1, "t": 20}, {"q": "Vrai ou faux : on voit la Grande Muraille de Chine à l'œil nu depuis la Lune.", "a": ["Vrai", "Faux", "", ""], "c": 1, "t": 15}], "paroles": [], "final": [{"q": "Combien font 7 × 8 ?", "a": ["54", "56", "58", "64"], "c": 1, "t": 15}, {"q": "Combien de jours aura février en 2028 ?", "a": ["28", "29", "30", "31"], "c": 1, "t": 15}, {"q": "Quel est le pluriel de « cheval » ?", "a": ["Des chevals", "Des chevaux", "Des chevales", "Des chevaus"], "c": 1, "t": 15}, {"q": "Combien de minutes y a-t-il dans 2 heures ?", "a": ["100", "120", "200", "60"], "c": 1, "t": 15}, {"q": "Quelle est la capitale de l'Espagne ?", "a": ["Barcelone", "Madrid", "Séville", "Valence"], "c": 1, "t": 15}, {"q": "Bleu + jaune, ça donne…", "a": ["Du vert", "Du violet", "De l'orange", "Du marron"], "c": 0, "t": 15}, {"q": "Combien de lettres a l'alphabet ?", "a": ["24", "25", "26", "28"], "c": 2, "t": 15}, {"q": "Combien font 100 − 37 ?", "a": ["63", "73", "67", "53"], "c": 0, "t": 15}, {"q": "Quel est le contraire de « rapide » ?", "a": ["Vite", "Lent", "Fort", "Haut"], "c": 1, "t": 15}, {"q": "Qui a marché le premier sur la Lune ?", "a": ["Neil Armstrong", "Thomas Pesquet", "Buzz l'Éclair", "Youri Gagarine"], "c": 0, "t": 15}, {"q": "Quel est le féminin de « acteur » ?", "a": ["Acteuse", "Actrice", "Acteure", "Actrisse"], "c": 1, "t": 15}, {"q": "Quelle est la moitié de 50 ?", "a": ["20", "25", "30", "15"], "c": 1, "t": 15}, {"q": "Combien de faces a un dé classique ?", "a": ["4", "6", "8", "12"], "c": 1, "t": 15}, {"q": "Quel est le seul mammifère capable de vraiment voler ?", "a": ["L'écureuil volant", "La chauve-souris", "Le pingouin", "L'autruche"], "c": 1, "t": 15}, {"q": "Combien de côtés a un triangle ?", "a": ["2", "3", "4", "5"], "c": 1, "t": 15}]};
+DEFAULT_THEMES.forEach(t => { if (BASE_QS[t.id]) t.qs = BASE_QS[t.id]; });
+const KEY = 'csahr-plusnul-v2';
 const clone = o => JSON.parse(JSON.stringify(o));
 function loadThemes(){
   const base = clone(DEFAULT_THEMES);
