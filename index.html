@@ -111,6 +111,9 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
 .ans label{display:flex;align-items:center;gap:8px;margin:0;font-weight:700}
 .ans input[type=radio]{width:24px;height:24px;flex:none;accent-color:var(--green)}
 .ans .sw{width:16px;align-self:stretch;border-radius:6px;flex:none}
+.aud{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;font-weight:800;background:#f1f3fb;border-radius:12px;padding:8px 10px}
+.aud input[type=number]{width:84px;padding:6px 8px;font-size:16px}
+.aud .btn{min-height:40px;padding:6px 14px;font-size:15px}
 .x{background:none;border:0;color:var(--red);font:800 15px Nunito;cursor:pointer;min-height:44px;padding:0 8px}
 .hint{background:rgba(255,255,255,.12);border-radius:14px;padding:12px 16px;font-weight:700}
 .sticky{position:sticky;bottom:0;padding:14px;background:var(--night);border-radius:18px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:min(100%,900px);box-shadow:0 -6px 20px rgba(0,0,0,.4)}
@@ -222,7 +225,7 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   <div class="board"><div class="qtext" id="q-text"></div></div>
   <div class="tiles" id="q-tiles"></div>
   <div class="exitbar" id="q-exit" hidden></div>
-  <div class="row"><button class="btn alt" id="q-skip">Arrêter le chrono</button><button class="btn gold" id="q-next" hidden>Suivant</button></div>
+  <div class="row"><button class="btn alt" id="q-replay" hidden>▶ Rejouer la musique</button><button class="btn alt" id="q-skip">Arrêter le chrono</button><button class="btn gold" id="q-next" hidden>Suivant</button></div>
 </section>
 
 <section class="screen" id="s-bul" hidden>
@@ -325,6 +328,7 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   </div>
   <div class="a-themes" id="a-themes" hidden></div>
   <button class="btn gold" id="a-next" style="width:min(100%,460px);min-height:84px;font-size:24px" disabled>…</button>
+  <button class="btn alt" id="a-replay" hidden>▶ Rejouer la musique</button>
   <button class="btn alt" id="a-skip" hidden>Arrêter le chrono</button>
   <p class="err" id="a-err" style="color:#fff"></p>
 </section>
@@ -435,7 +439,7 @@ const DEFAULT_THEMES = [
   {id:'cg', name:'Culture G', emoji:'🧠', color:'#ff8a1c', qs:[
   ]},
   {id:'paroles', name:'On connaît les paroles', emoji:'🎤', color:'#e5383b', qs:[],
-    hint:"Matière à remplir toi-même : écris un petit extrait de chanson avec un trou (ex. « … ___ … »), puis 4 propositions pour le mot manquant. Garde des extraits courts."},
+    hint:"Matière à remplir toi-même. Astuce : ajoute une musique (MP3) à la question, règle le début et la fin de l'extrait, et mets en réponses 4 suites possibles des paroles. L'extrait se joue sur l'ordi de l'animateur et s'arrête tout seul. La musique reste sur cet ordinateur."},
   {id:'final', name:'La grande finale', emoji:'🎓', color:'#ffc21a', final:true,
     hint:"La finale : à chaque question, les élèves encore en classe qui répondent juste sortent. Le dernier qui reste est le plus nul.", qs:[
   ]}
@@ -454,6 +458,26 @@ const saveThemes = () => { const o = {}; THEMES.forEach(t => o[t.id] = t.qs); st
 const validQs = t => t.qs.filter(q => q.q.trim() && q.a.filter(x => x.trim()).length >= 2 && (q.a[q.c] || '').trim());
 const updateCount = () => { const n = THEMES.reduce((s, t) => s + validQs(t).length, 0); $('#qcount').textContent = `${n} questions prêtes dans ${THEMES.filter(t => validQs(t).length).length} matières`; };
 
+/* ---------- Extraits audio (gardés dans ce navigateur) ---------- */
+const AUD = {
+  db:null, urls:{},
+  open(){ return this.db || (this.db = new Promise((res, rej) => { try { const r = indexedDB.open('csahr-audio', 1); r.onupgradeneeded = () => r.result.createObjectStore('clips'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch(e){ rej(e); } })); },
+  async put(id, blob){ const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction('clips', 'readwrite'); tx.objectStore('clips').put(blob, id); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); },
+  async get(id){ try { const db = await this.open(); return await new Promise(res => { const r = db.transaction('clips').objectStore('clips').get(id); r.onsuccess = () => res(r.result || null); r.onerror = () => res(null); }); } catch(e){ return null; } },
+  async url(id){ if (this.urls[id]) return this.urls[id]; const b = await this.get(id); return b ? (this.urls[id] = URL.createObjectURL(b)) : null; }
+};
+const player = new Audio(); let curClip = null;
+player.addEventListener('timeupdate', () => { if (curClip && curClip.e > curClip.s && player.currentTime >= curClip.e) player.pause(); });
+async function playClip(au){
+  if (!au || !au.id) return false;
+  const u = await AUD.url(au.id); if (!u) return false;
+  curClip = au;
+  const go = () => { try { player.currentTime = au.s || 0; } catch(e){} player.play().catch(() => {}); };
+  if (player.dataset.u !== u) { player.dataset.u = u; player.src = u; player.addEventListener('loadedmetadata', go, {once:true}); player.load(); } else go();
+  return true;
+}
+const stopClip = () => { curClip = null; try { player.pause(); } catch(e){} };
+
 /* ---------- Éditeur ---------- */
 let eTab = 'sport';
 const curT = () => THEMES.find(t => t.id === eTab);
@@ -470,6 +494,9 @@ function renderEditor(){
       <div class="ans">${[0,1,2,3].map(j => `
         <label><span class="sw c${j}"></span><input type="radio" name="c${i}" data-i="${i}" data-c="${j}" ${q.c === j ? 'checked' : ''} aria-label="Bonne réponse ${j + 1}">
         <input data-i="${i}" data-a="${j}" value="${esc(q.a[j] || '')}" placeholder="Réponse ${j + 1}"></label>`).join('')}</div>
+      <div class="aud">🎵 <label class="btn alt">${q.audio ? 'Changer' : 'Ajouter une musique'}<input type="file" accept="audio/*" data-i="${i}" data-file hidden></label>
+        ${q.audio ? `<span>${esc(q.audio.name)}</span><span>début <input type="number" min="0" step="0.5" data-i="${i}" data-au="s" value="${q.audio.s}"> s</span><span>fin <input type="number" min="0" step="0.5" data-i="${i}" data-au="e" value="${q.audio.e}"> s</span>
+        <button class="x" data-play="${i}">▶ Écouter l'extrait</button><button class="x" data-stop>■ Stop</button><button class="x" data-unaud="${i}">Retirer</button>` : '<span class="small" style="opacity:.7">facultatif</span>'}</div>
     </div>`).join('') || '<p class="hint">Aucune question pour l\'instant. Clique sur « Ajouter une question ».</p>';
 }
 $('#e-tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) { eTab = b.dataset.tab; renderEditor(); } });
@@ -479,10 +506,23 @@ $('#qlist').addEventListener('input', e => {
   else if (t.dataset.k === 't') qs[i].t = +t.value;
   else if (t.dataset.a !== undefined) qs[i].a[+t.dataset.a] = t.value;
   else if (t.dataset.c !== undefined) qs[i].c = +t.dataset.c;
+  else if (t.dataset.au && qs[i].audio) qs[i].audio[t.dataset.au] = Math.max(0, +t.value || 0);
   saveThemes();
 });
-$('#qlist').addEventListener('change', e => { if (e.target.dataset.c !== undefined) { curT().qs[+e.target.dataset.i].c = +e.target.dataset.c; saveThemes(); } });
-$('#qlist').addEventListener('click', e => { const d = e.target.dataset.del; if (d !== undefined) { curT().qs.splice(+d, 1); saveThemes(); renderEditor(); } });
+$('#qlist').addEventListener('change', async e => {
+  const t = e.target, q = curT().qs[+t.dataset.i];
+  if (t.dataset.c !== undefined) { q.c = +t.dataset.c; saveThemes(); }
+  if (t.dataset.file !== undefined && t.files && t.files[0]) {
+    const f = t.files[0], id = 'a' + rid();
+    try { await AUD.put(id, f); q.audio = {id, name:f.name.slice(0, 60), s:q.audio ? q.audio.s : 0, e:q.audio ? q.audio.e : 15}; saveThemes(); renderEditor(); }
+    catch(err){ alert('Impossible d\'enregistrer cette musique sur cet ordinateur.'); }
+  }
+});
+$('#qlist').addEventListener('click', e => { const ds = e.target.dataset, qs = curT().qs;
+  if (ds.del !== undefined) { qs.splice(+ds.del, 1); saveThemes(); renderEditor(); }
+  else if (ds.play !== undefined) playClip(qs[+ds.play].audio).then(ok => { if (!ok) e.target.textContent = 'Musique introuvable sur cet ordi'; });
+  else if (ds.stop !== undefined) stopClip();
+  else if (ds.unaud !== undefined) { delete qs[+ds.unaud].audio; saveThemes(); renderEditor(); } });
 $('#e-add').onclick = () => { curT().qs.push({q:'', a:['','','',''], c:0, t:20}); saveThemes(); renderEditor(); const l = $('#qlist').lastElementChild; if (l) l.querySelector('textarea').focus(); };
 $('#e-reset').onclick = () => { const d = DEFAULT_THEMES.find(t => t.id === eTab); curT().qs = clone(d.qs); saveThemes(); renderEditor(); };
 $('#e-done').onclick = () => { updateCount(); show('s-home'); };
@@ -513,7 +553,7 @@ $('#ex-ok').onclick = async () => {
   let d; try { d = JSON.parse($('#ex-text').value); } catch(e){ $('#ex-err').style.color = 'var(--red)'; $('#ex-err').textContent = 'Ce texte n\'est pas reconnu.'; return; }
   const src = d && d.themes; let n = 0;
   if (src && typeof src === 'object') THEMES.forEach(t => { const qs = src[t.id]; if (!Array.isArray(qs)) return;
-    t.qs = qs.filter(q => q && typeof q.q === 'string' && Array.isArray(q.a)).map(q => ({q:q.q, a:[0,1,2,3].map(j => String(q.a[j] || '')), c:Math.min(Math.max(q.c | 0, 0), 3), t:[10,15,20,30,45].includes(q.t) ? q.t : 20}));
+    t.qs = qs.filter(q => q && typeof q.q === 'string' && Array.isArray(q.a)).map(q => ({q:q.q, a:[0,1,2,3].map(j => String(q.a[j] || '')), c:Math.min(Math.max(q.c | 0, 0), 3), t:[10,15,20,30,45].includes(q.t) ? q.t : 20, ...(q.audio && typeof q.audio.id === 'string' ? {audio:{id:q.audio.id, name:String(q.audio.name || 'musique'), s:+q.audio.s || 0, e:+q.audio.e || 0}} : {})}));
     n += t.qs.length; });
   if (!n) { $('#ex-err').style.color = 'var(--red)'; $('#ex-err').textContent = 'Aucune question trouvée dans ce texte.'; return; }
   saveThemes(); renderEditor(); updateCount(); $('#ex-ov').hidden = true;
@@ -616,6 +656,7 @@ function onHostMsg(pid, m){
   } else if (m.t === 'cmd' && H.admins.has(pid)) {
     if (m.c === 'next') hostNext();
     else if (m.c === 'skip' && H.phase === 'question') reveal();
+    else if (m.c === 'replay') hostReplay();
     else if (m.c === 'theme' && H.phase === 'menu') startManche(String(m.id));
     pushAdmin();
   }
@@ -655,7 +696,7 @@ function renderCount(){
 }
 
 function showMenu(){
-  H.phase = 'menu'; H.manche = null; clearInterval(H.tick);
+  stopClip(); H.phase = 'menu'; H.manche = null; clearInterval(H.tick);
   const c = inClass().length;
   $('#m-tiles').innerHTML = THEMES.map(t => {
     const n = validQs(t).length, done = H.done.has(t.id);
@@ -690,8 +731,11 @@ function sendQ(p){
     theme:t.final ? 'Finale' : t.name, color:t.color, inClass:p.inClass});
 }
 function startQuestion(i){
-  H.qi = i; H.phase = 'question'; H.counts = [0,0,0,0]; $('#admin-ov').hidden = true;
+  H.qi = i; H.phase = 'question'; H.counts = [0,0,0,0]; $('#admin-ov').hidden = true; stopClip();
   const q = curQ(), t = H.manche; H.limit = (q.t || 20) * 1000; H.start = Date.now();
+  $('#q-replay').hidden = !q.audio; $('#q-replay').textContent = '▶ Rejouer la musique';
+  if (q.audio) { H.limit += Math.max(0, (q.audio.e || 0) - (q.audio.s || 0)) * 1000;
+    playClip(q.audio).then(ok => { if (!ok) $('#q-replay').textContent = 'Musique introuvable sur cet ordi'; }); }
   $('#q-tag').textContent = `${t.emoji} ${t.final ? 'Finale' : t.name} · ${i + 1}/${H.qs.length}`; $('#q-tag').style.background = t.color;
   $('#q-tag').style.color = t.final ? '#2b1d00' : '#fff';
   $('#q-text').textContent = q.q;
@@ -729,6 +773,7 @@ function reveal(){
     $('#q-next').textContent = H.qi + 1 < H.qs.length ? 'Question suivante' : 'Voir le bulletin';
   }
   $('#q-skip').hidden = true; $('#q-next').hidden = false;
+  if (q.audio) $('#q-replay').textContent = '▶ Écouter la suite';
   H.players.forEach(p => { if (!p.on) return; const a = p.ans[k];
     H.net.send(p.pid, {t:'res', ok:!!(a && a.ok), none:!a, good, counted:!!(a && a.counted), final:!!t.final,
       exited:exited.includes(p), inClass:p.inClass, note:t.final ? null : `${noteOf(p, t.id).ok}/${H.qi + 1}`}); });
@@ -737,7 +782,7 @@ function reveal(){
 function graduate(p, where){ p.inClass = false; p.out = {rank:H.exits.length + 1, where}; H.exits.push(p.key); }
 
 function bulletin(){
-  H.phase = 'bulletin';
+  stopClip(); H.phase = 'bulletin';
   const t = H.manche, cls = inClass(), remaining = playable().filter(x => !H.done.has(x.id)).length;
   const k = Math.max(0, Math.ceil((cls.length - 3) / (remaining + 1)));
   const ranked = cls.slice().sort((a, b) => noteOf(b, t.id).ok - noteOf(a, t.id).ok || noteOf(a, t.id).el - noteOf(b, t.id).el);
@@ -753,7 +798,7 @@ function bulletin(){
   pushAdmin();
 }
 function finale(){
-  H.phase = 'end'; clearInterval(H.tick);
+  stopClip(); H.phase = 'end'; clearInterval(H.tick);
   const losers = inClass(); H.losers = losers;
   $('#e-pre').textContent = losers.length > 1 ? 'Et les plus nuls sont…' : 'Et le plus nul est…';
   $('#e-losers').innerHTML = losers.map(p => `<div class="loser"><span class="av-x" style="margin-top:70px">${judoka(p.av, 'dunce')}</span><b>${esc(p.name)}</b><span class="trophy">🏆</span></div>`).join('') || '<p class="sub">Personne ! Toute la classe est diplômée.</p>';
@@ -800,7 +845,7 @@ function pushAdmin(){
   const q = H.phase === 'question' || H.phase === 'reveal' ? curQ() : null, ps = participants();
   const st = {t:'astate', phase:H.phase, label:nextLabel(), players:active().length, inClass:inClass().length,
     title:H.manche ? (H.manche.final ? 'Grande finale' : H.manche.name) : '', qi:H.qi, n:H.qs.length,
-    q:q ? q.q : '', good:q ? q.a[q.c].trim() : '', answered:q ? ps.filter(p => p.ans[qkey()]).length : 0, part:ps.length,
+    q:q ? q.q : '', good:q ? q.a[q.c].trim() : '', audio:!!(q && q.audio), answered:q ? ps.filter(p => p.ans[qkey()]).length : 0, part:ps.length,
     canNext:H.phase !== 'lobby' || active().length > 0,
     themes:THEMES.map(t => ({id:t.id, name:t.final ? 'Finale' : t.name, emoji:t.emoji, color:t.color, n:validQs(t).length, done:H.done.has(t.id), final:!!t.final}))};
   H.admins.forEach(a => H.net.send(a, st));
@@ -813,6 +858,12 @@ $('#l-start').onclick = hostNext;
 $('#l-quit').onclick = () => { H.net.stop(); H = null; $('#b-fs').hidden = true; show('s-home'); };
 $('#i-go').onclick = hostNext;
 $('#q-skip').onclick = hostNext;
+function hostReplay(){
+  if (!H || (H.phase !== 'question' && H.phase !== 'reveal')) return;
+  const q = curQ(); if (!q || !q.audio) return;
+  playClip(H.phase === 'question' ? q.audio : {id:q.audio.id, s:q.audio.e, e:q.audio.e + 20});
+}
+$('#q-replay').onclick = hostReplay;
 $('#q-next').onclick = hostNext;
 $('#bul-next').onclick = hostNext;
 $('#end-again').onclick = hostNext;
@@ -963,11 +1014,13 @@ function adminJoin(){
       if (menu) $('#a-themes').innerHTML = m.themes.map(t => `<button class="tile-t ${t.final ? 'final' : ''} ${t.done ? 'done' : ''}" style="${t.final ? '' : 'background:' + t.color}" data-theme="${t.id}" ${!t.n || (t.final && !m.inClass) ? 'disabled' : ''}><span class="em">${t.emoji}</span><b>${esc(t.name)}</b></button>`).join('');
       $('#a-next').hidden = menu; $('#a-next').textContent = m.label; $('#a-next').disabled = !m.canNext;
       $('#a-skip').hidden = m.phase !== 'question';
+      $('#a-replay').hidden = !m.audio; $('#a-replay').textContent = m.phase === 'reveal' ? '▶ Écouter la suite' : '▶ Rejouer la musique';
     }
   });
 }
 $('#a-next').onclick = () => { if (A && A.ok) { A.net.send({t:'cmd', c:'next'}); $('#a-next').disabled = true; } };
 $('#a-skip').onclick = () => { if (A && A.ok) A.net.send({t:'cmd', c:'skip'}); };
+$('#a-replay').onclick = () => { if (A && A.ok) A.net.send({t:'cmd', c:'replay'}); };
 $('#a-themes').addEventListener('click', e => { const b = e.target.closest('[data-theme]'); if (b && !b.disabled && A && A.ok) A.net.send({t:'cmd', c:'theme', id:b.dataset.theme}); });
 
 /* ---------- Démarrage ---------- */
