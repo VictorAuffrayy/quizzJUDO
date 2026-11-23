@@ -373,7 +373,7 @@ label{display:block;font-weight:800;text-align:left;margin:12px 0 6px}
   <p class="err" id="a-err" style="color:#fff"></p>
 </section>
 
-<div class="topbar" id="topbar" hidden><button class="btn gold" id="b-rank">🏆 Classement</button><button class="btn alt" id="b-snd">🔊 Sons</button><button class="btn alt" id="b-fs">Plein écran</button></div>
+<div class="topbar" id="topbar" hidden><button class="btn gold" id="b-rank">🏆 Classement</button><button class="btn alt" id="b-mus">🎵 Musique</button><button class="btn alt" id="b-snd">🔊 Sons</button><button class="btn alt" id="b-fs">Plein écran</button></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -662,6 +662,56 @@ const SFX = {
   fanfare(at = 0){ [[523,0],[523,.15],[523,.3],[659,.45],[784,.75],[659,1],[784,1.15],[1047,1.4]].forEach(([f, a]) => { this.tone(f, .35, {type:'sawtooth', v:.07, at:at + a}); this.tone(f / 2, .35, {type:'triangle', v:.1, at:at + a}); }); },
   sad(){ [392, 370, 349, 311].forEach((f, i) => this.tone(f, i === 3 ? 1.1 : .45, {type:'triangle', at:i * .45, v:.2})); }
 };
+/* ---------- Musique de fond (générée, en boucle) ---------- */
+const MUS = {
+  on:true, mood:null, want:null, timer:null, step:0, next:0, gain:null,
+  CH:{
+    lobby:{bpm:116, vol:.10, chords:[[261.63,329.63,392],[196,246.94,293.66],[220,261.63,329.63],[174.61,220,261.63]]},
+    think:{bpm:100, vol:.085, chords:[[220,261.63,329.63],[174.61,220,261.63],[146.83,174.61,220],[164.81,207.65,246.94]]}
+  },
+  start(mood){
+    this.want = mood; if (!this.on || this.mood === mood) return;
+    SFX.init(); const c = SFX.ctx; if (!c) return;
+    this.stop(true); this.want = mood; this.mood = mood;
+    const g = this.gain = c.createGain(); g.gain.setValueAtTime(.0001, c.currentTime); g.gain.linearRampToValueAtTime(this.CH[mood].vol, c.currentTime + 1.2); g.connect(c.destination);
+    this.step = 0; this.next = c.currentTime + .1; this.timer = setInterval(() => this.sched(), 25);
+  },
+  stop(keepWant){
+    if (!keepWant) this.want = null;
+    clearInterval(this.timer); this.timer = null; this.mood = null;
+    const c = SFX.ctx, g = this.gain; this.gain = null;
+    if (g && c) { g.gain.cancelScheduledValues(c.currentTime); g.gain.setValueAtTime(Math.max(g.gain.value, .0001), c.currentTime); g.gain.linearRampToValueAtTime(.0001, c.currentTime + .5); setTimeout(() => { try { g.disconnect(); } catch(e){} }, 800); }
+  },
+  osc(f, t, d, type, v){ const c = SFX.ctx, o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g).connect(this.gain); o.start(t); o.stop(t + d + .05); },
+  hit(t, d, v, hp){ const c = SFX.ctx; if (!this.buf) { const b = this.buf = c.createBuffer(1, c.sampleRate * .3 | 0, c.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1; }
+    const s = c.createBufferSource(); s.buffer = this.buf; const fl = c.createBiquadFilter(); fl.type = 'highpass'; fl.frequency.value = hp; const g = c.createGain();
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d); s.connect(fl).connect(g).connect(this.gain); s.start(t); s.stop(t + d + .02); },
+  kick(t){ const c = SFX.ctx, o = c.createOscillator(), g = c.createGain(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + .15);
+    g.gain.setValueAtTime(.7, t); g.gain.exponentialRampToValueAtTime(.0001, t + .2); o.connect(g).connect(this.gain); o.start(t); o.stop(t + .25); },
+  sched(){
+    const c = SFX.ctx; if (!c || !this.gain) return;
+    const m = this.CH[this.mood], sp = 60 / m.bpm / 4;
+    while (this.next < c.currentTime + .15) { this.play(this.step, this.next, sp, m); this.step = (this.step + 1) % 64; this.next += sp; }
+  },
+  play(s, t, sp, m){
+    const ch = m.chords[s >> 4], i = s % 16;
+    if (this.mood === 'lobby') {
+      if ([0, 6, 8, 14].includes(i)) this.osc(ch[0] / 2, t, sp * 1.8, 'triangle', .38);
+      if (i % 2 === 0) this.osc(ch[(i / 2) % 3] * 2, t, sp * 1.4, 'triangle', .11);
+      if (i % 8 === 0) this.kick(t);
+      if (i === 4 || i === 12) this.hit(t, .12, .16, 1800);
+      if (i % 4 === 2) this.hit(t, .04, .06, 7000);
+    } else {
+      if (i % 4 === 0) this.osc(ch[0] / 2, t, sp * 2.5, 'square', .12);
+      this.osc(ch[[0, 1, 2, 1][i % 4]] * 2, t, sp * .8, 'square', .035);
+      if (i % 2 === 0) this.hit(t, .03, .05, 8000);
+      if (i === 0) this.osc(ch[2] * 4, t, sp * 6, 'sine', .04);
+    }
+  }
+};
+$('#b-mus').onclick = () => { MUS.on = !MUS.on; $('#b-mus').textContent = MUS.on ? '🎵 Musique' : '🎵 Coupée';
+  if (MUS.on) { const w = MUS.want; MUS.want = null; if (w) MUS.start(w); } else MUS.stop(true); };
 $('#b-snd').onclick = () => { SFX.on = !SFX.on; $('#b-snd').textContent = SFX.on ? '🔊 Sons' : '🔇 Muet'; };
 
 /* ==================== ANIMATEUR ==================== */
@@ -678,7 +728,7 @@ const ranking = () => [...H.players.values()].sort((a, b) => (b.good || 0) - (a.
 const rankOf = p => ranking().indexOf(p) + 1;
 
 function startHost(local, mode){
-  SFX.init();
+  SFX.init(); MUS.start('lobby');
   const code = String(1000 + Math.floor(Math.random() * 9000));
   H = {code, local, players:new Map(), pid2key:new Map(), phase:'lobby', manche:null, qs:[], qi:-1, start:0, limit:0, tick:null,
        counts:[0,0,0,0], pin:rid(), admins:new Set(), done:new Set(), exits:[], lastOut:[], losers:[], mode:mode === 'classic' ? 'classic' : 'nul'};
@@ -771,7 +821,7 @@ function renderCount(){
 }
 
 function showMenu(){
-  stopClip(); H.phase = 'menu'; H.manche = null; clearInterval(H.tick);
+  MUS.start('lobby'); stopClip(); H.phase = 'menu'; H.manche = null; clearInterval(H.tick);
   const c = inClass().length;
   $('#m-tiles').innerHTML = THEMES.map(t => {
     const n = validQs(t).length, done = H.done.has(t.id);
@@ -791,7 +841,7 @@ function startManche(id){
   if (t.final && !inClass().length) return;
   H.manche = t; H.qs = qs; H.qi = -1; H.done.add(id); H.phase = 'intro';
   H.players.forEach(p => { p.notes[t.id] = {ok:0, el:0}; });
-  SFX.jingle();
+  MUS.stop(); SFX.jingle();
   $('#i-em').textContent = t.emoji; $('#i-name').textContent = t.final ? (classic() ? 'Questions éclair' : 'Qui sera le plus nul ?') : 'Contrôle de ' + t.name;
   $('#i-name').style.color = t.color;
   $('#i-rule').textContent = classic() ? `${qs.length} questions. Chaque bonne réponse rapporte un point au classement. Réponds vite pour départager les égalités !` : t.final
@@ -810,6 +860,7 @@ function startQuestion(i){
   H.qi = i; H.phase = 'question'; H.counts = [0,0,0,0]; $('#admin-ov').hidden = true; stopClip();
   const q = curQ(), t = H.manche; H.limit = (q.t || 20) * 1000; H.start = Date.now();
   $('#q-replay').hidden = !q.audio; $('#q-replay').textContent = '▶ Rejouer la musique';
+  if (q.audio) MUS.stop(); else MUS.start('think');
   if (q.audio) { H.limit += Math.max(0, (q.audio.e || 0) - (q.audio.s || 0)) * 1000;
     playClip(q.audio).then(ok => { if (!ok) $('#q-replay').textContent = 'Musique introuvable sur cet ordi'; }); }
   $('#q-tag').textContent = `${t.emoji} ${tname(t)} · ${i + 1}/${H.qs.length}`; $('#rank-ov').hidden = true; H.lastLeft = null; $('#q-tag').style.background = t.color;
@@ -836,7 +887,8 @@ function reveal(){
   H.players.forEach(p => { const a = p.ans[k]; if (a && a.counted && a.ok) { noteOf(p, t.id).ok++; noteOf(p, t.id).el += a.el; }
     if (a && a.ok) { p.good = (p.good || 0) + 1; p.time = (p.time || 0) + a.el; } });
   const anyGood = participants().some(p => p.ans[k] && p.ans[k].ok);
-  anyGood ? SFX.good() : SFX.buzz();
+  anyGood ? SFX.good() : SFX.buzz(); MUS.stop();
+  if (!q.audio) setTimeout(() => { if (H && H.phase === 'reveal') MUS.start('lobby'); }, 1600);
   let exited = [];
   if (t.final && !classic()) {
     const cls = inClass();
@@ -864,7 +916,7 @@ function reveal(){
 function graduate(p, where){ p.inClass = false; p.out = {rank:H.exits.length + 1, where}; H.exits.push(p.key); }
 
 function bulletin(){
-  stopClip(); H.phase = 'bulletin';
+  stopClip(); MUS.start('lobby'); H.phase = 'bulletin';
   const t = H.manche, cls = inClass(), remaining = playable().filter(x => !H.done.has(x.id)).length;
   const k = classic() ? 0 : Math.max(0, Math.ceil((cls.length - 3) / (remaining + 1)));
   const ranked = cls.slice().sort((a, b) => noteOf(b, t.id).ok - noteOf(a, t.id).ok || noteOf(a, t.id).el - noteOf(b, t.id).el);
@@ -880,7 +932,7 @@ function bulletin(){
   pushAdmin();
 }
 function finale(){
-  stopClip(); H.phase = 'end'; clearInterval(H.tick);
+  stopClip(); MUS.stop(); H.phase = 'end'; clearInterval(H.tick); setTimeout(() => { if (H && H.phase === 'end') MUS.start('lobby'); }, 7000);
   const losers = inClass(); H.losers = losers;
   $('#e-pre').textContent = losers.length > 1 ? 'Et les plus nuls sont…' : 'Et le plus nul est…';
   $('#e-losers').innerHTML = losers.map(p => `<div class="loser"><span class="av-x" style="margin-top:70px">${judoka(p.av, 'dunce')}</span><b>${esc(p.name)}</b><span class="trophy">🏆</span></div>`).join('') || '<p class="sub">Personne ! Toute la classe est diplômée.</p>';
@@ -894,7 +946,7 @@ function finale(){
   pushAdmin();
 }
 function podium(){
-  stopClip(); H.phase = 'end'; clearInterval(H.tick); $('#rank-ov').hidden = true;
+  stopClip(); MUS.stop(); H.phase = 'end'; clearInterval(H.tick); setTimeout(() => { if (H && H.phase === 'end') MUS.start('lobby'); }, 7000); $('#rank-ov').hidden = true;
   const r = ranking(), lbl = p => `${p.good || 0} bonne${(p.good || 0) > 1 ? 's' : ''} réponse${(p.good || 0) > 1 ? 's' : ''}`;
   $('#pod').innerHTML = [1, 0, 2].map(k => r[k] ? `<div class="step p${k + 1}"><span class="av-p">${judoka(r[k].av, k === 0 ? 'grad' : null)}</span><b>${esc(r[k].name)}</b><span class="pill">${lbl(r[k])}</span><div class="block">${k + 1}</div></div>` : '<div class="step"></div>').join('');
   $('#pod-rest').innerHTML = r.slice(3).map((p, i) => `<span class="dchip"><span class="rk">${i + 4}</span><span class="av-m">${judoka(p.av)}</span>${esc(p.name)} · ${p.good || 0}</span>`).join('');
@@ -918,7 +970,7 @@ function again(){
   H.done = new Set(); H.exits = []; H.manche = null; H.qi = -1; H.phase = 'lobby';
   for (const [k, p] of H.players) { if (!p.on) H.players.delete(k); else { p.ans = {}; p.notes = {}; p.inClass = true; p.out = null; p.good = 0; p.time = 0; } }
   H.players.forEach(p => H.net.send(p.pid, {t:'lobby'}));
-  show('s-lobby'); renderLobby();
+  show('s-lobby'); renderLobby(); MUS.start('lobby');
 }
 function hostNext(){
   if (!H) return;
@@ -963,10 +1015,11 @@ document.querySelectorAll('.mode-card').forEach(b => b.onclick = () => startHost
 $('#b-edit').onclick = () => { renderEditor(); show('s-edit'); };
 $('#b-iamplayer').onclick = () => playerJoin(params.get('local') === '1');
 $('#l-start').onclick = hostNext;
-$('#l-quit').onclick = () => { H.net.stop(); H = null; $('#topbar').hidden = true; show('s-home'); };
+$('#l-quit').onclick = () => { MUS.stop(); H.net.stop(); H = null; $('#topbar').hidden = true; show('s-home'); };
 $('#i-go').onclick = hostNext;
 $('#q-skip').onclick = hostNext;
 function hostReplay(){
+  MUS.stop(true);
   if (!H || (H.phase !== 'question' && H.phase !== 'reveal')) return;
   const q = curQ(); if (!q || !q.audio) return;
   playClip(H.phase === 'question' ? q.audio : {id:q.audio.id, s:q.audio.e, e:q.audio.e + 20});
@@ -975,7 +1028,7 @@ $('#q-replay').onclick = hostReplay;
 $('#q-next').onclick = hostNext;
 $('#bul-next').onclick = hostNext;
 $('#end-again').onclick = hostNext;
-$('#end-home').onclick = $('#pod-home').onclick = () => { H.net.stop(); H = null; $('#topbar').hidden = true; $('#rank-ov').hidden = true; show('s-home'); };
+$('#end-home').onclick = $('#pod-home').onclick = () => { MUS.stop(); H.net.stop(); H = null; $('#topbar').hidden = true; $('#rank-ov').hidden = true; show('s-home'); };
 $('#pod-again').onclick = hostNext;
 $('#m-podium').onclick = () => { if (H && classic() && H.phase === 'menu') podium(); };
 $('#b-rank').onclick = () => toggleRank();
